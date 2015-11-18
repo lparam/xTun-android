@@ -21,11 +21,6 @@ android {
         abortOnError true
         disable 'MissingTranslation'
     }
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude '.readme'
-    }
     buildTypes {
         release {
             try {
