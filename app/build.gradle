@@ -15,11 +15,16 @@ android {
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 100
-        versionName '1.0.0'
+        versionName '1.0.1'
     }
     lintOptions {
         abortOnError true
         disable 'MissingTranslation'
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude '.readme'
     }
     buildTypes {
         release {
