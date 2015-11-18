@@ -1,0 +1,3 @@
+[submodule "jni/xTun"]
+	path = jni/xTun
+	url = https://github.com/lparam/xTun.git
