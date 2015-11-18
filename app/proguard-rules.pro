@@ -25,4 +25,5 @@
 -keep class com.nostra13.universalimageloader.** { *; }
 
 # xtun
--keep class io.github.xtun.model.** { *; }
+-keep class io.github.xTun.model.** { *; }
+-keep class io.github.xTun.service.XtunVpnService { *; }
