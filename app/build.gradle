@@ -14,7 +14,7 @@ android {
         applicationId "io.github.xTun"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 100
+        versionCode 101
         versionName '1.0.1'
     }
     lintOptions {
@@ -77,6 +77,6 @@ dependencies {
         transitive = true
     }
     compile 'dnsjava:dnsjava:2.1.7'
-    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.8.4'
 }
