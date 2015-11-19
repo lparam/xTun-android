@@ -7,10 +7,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 
-import io.github.xTun.ui.XtunRunnerActivity;
+import io.github.xTun.ui.xTunRunnerActivity;
 import io.github.xTun.utils.Constants;
 
-public class XtunReceiver extends BroadcastReceiver{
+public class xTunReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -27,7 +27,7 @@ public class XtunReceiver extends BroadcastReceiver{
         if (isAutoConnect && isInstalled) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                Intent i = new Intent(context, XtunRunnerActivity.class);
+                Intent i = new Intent(context, xTunRunnerActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(i);

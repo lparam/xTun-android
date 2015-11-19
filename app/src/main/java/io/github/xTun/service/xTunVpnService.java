@@ -27,19 +27,19 @@ import java.io.OutputStream;
 
 import io.github.xTun.R;
 import io.github.xTun.aidl.Config;
-import io.github.xTun.aidl.IXtunService;
-import io.github.xTun.aidl.IXtunServiceCallback;
+import io.github.xTun.aidl.IxTunService;
+import io.github.xTun.aidl.IxTunServiceCallback;
 import io.github.xTun.model.ProxiedApp;
 import io.github.xTun.ui.AppManagerActivity;
 import io.github.xTun.ui.MainActivity;
-import io.github.xTun.ui.XtunRunnerActivity;
+import io.github.xTun.ui.xTunRunnerActivity;
 import io.github.xTun.utils.Constants;
 import io.github.xTun.utils.Utils;
 import io.github.xTun.xTun;
 
-public class XtunVpnService extends VpnService implements Handler.Callback, Runnable {
+public class xTunVpnService extends VpnService implements Handler.Callback, Runnable {
 
-    private String TAG = XtunVpnService.class.getSimpleName();
+    private String TAG = xTunVpnService.class.getSimpleName();
 
     private Config config = null;
     private ParcelFileDescriptor vpnInterface;
@@ -47,7 +47,7 @@ public class XtunVpnService extends VpnService implements Handler.Callback, Runn
     private BroadcastReceiver closeReceiver = null;
     private Constants.State state = Constants.State.INIT;
     private int callbackCount = 0;
-    private final RemoteCallbackList<IXtunServiceCallback> callbacks = new RemoteCallbackList<>();
+    private final RemoteCallbackList<IxTunServiceCallback> callbacks = new RemoteCallbackList<>();
 
     private Thread vpnThread;
     private Handler handler;
@@ -56,14 +56,14 @@ public class XtunVpnService extends VpnService implements Handler.Callback, Runn
     private final int CONNECTED = 1;
     private final int STOPPED = 2;
 
-    private IXtunService.Stub binder = new IXtunService.Stub() {
+    private IxTunService.Stub binder = new IxTunService.Stub() {
         @Override
         public int getState() throws RemoteException {
             return state.ordinal();
         }
 
         @Override
-        public void registerCallback(IXtunServiceCallback cb) throws RemoteException {
+        public void registerCallback(IxTunServiceCallback cb) throws RemoteException {
             if (cb != null) {
                 callbacks.register(cb);
                 callbackCount += 1;
@@ -71,7 +71,7 @@ public class XtunVpnService extends VpnService implements Handler.Callback, Runn
         }
 
         @Override
-        public void unregisterCallback(IXtunServiceCallback cb) throws RemoteException {
+        public void unregisterCallback(IxTunServiceCallback cb) throws RemoteException {
             if (cb != null ) {
                 callbacks.unregister(cb);
                 callbackCount -= 1;
@@ -267,7 +267,7 @@ public class XtunVpnService extends VpnService implements Handler.Callback, Runn
 
         // ensure the VPNService is prepared
         if (VpnService.prepare(this) != null) {
-            Intent i = new Intent(this, XtunRunnerActivity.class);
+            Intent i = new Intent(this, xTunRunnerActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             return;
