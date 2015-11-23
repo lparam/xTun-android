@@ -43,10 +43,10 @@ import java.util.List;
 import java.util.Locale;
 
 import io.github.xTun.R;
-import io.github.xTun.aidl.IXtunService;
-import io.github.xTun.aidl.IXtunServiceCallback;
+import io.github.xTun.aidl.IxTunService;
+import io.github.xTun.aidl.IxTunServiceCallback;
 import io.github.xTun.model.Profile;
-import io.github.xTun.service.XtunVpnService;
+import io.github.xTun.service.xTunVpnService;
 import io.github.xTun.store.ProfileManager;
 import io.github.xTun.utils.ConfigUtils;
 import io.github.xTun.utils.Constants;
@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
     private PreferenceBroadcastReceiver preferenceReceiver = new PreferenceBroadcastReceiver();
 
-    private IXtunService vpnService;
-    IXtunServiceCallback.Stub callback = new IXtunServiceCallback.Stub() {
+    private IxTunService vpnService;
+    IxTunServiceCallback.Stub callback = new IxTunServiceCallback.Stub() {
         @Override
         public void stateChanged(int state, String msg) {
             onStateChanged(state, msg);
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            vpnService = IXtunService.Stub.asInterface(service);
+            vpnService = IxTunService.Stub.asInterface(service);
             try {
                 vpnService.registerCallback(callback);
                 if (switchButton != null) switchButton.setEnabled(true);
@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void attachService() {
         if (vpnService == null) {
-            Class s = XtunVpnService.class;
+            Class s = xTunVpnService.class;
             Intent intent = new Intent(this, s);
             intent.setAction(Constants.Action.SERVICE);
             bindService(intent, connection, Context.BIND_AUTO_CREATE);

@@ -26,4 +26,4 @@
 
 # xtun
 -keep class io.github.xTun.model.** { *; }
--keep class io.github.xTun.service.XtunVpnService { *; }
+-keep class io.github.xTun.service.xTunVpnService { *; }

@@ -9,9 +9,9 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -43,10 +43,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import io.github.xTun.R;
 import io.github.xTun.model.ProxiedApp;
 import io.github.xTun.utils.Constants;
 import io.github.xTun.utils.Utils;
-import io.github.xTun.R;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.util.async.Async;
@@ -121,14 +121,9 @@ public class AppManagerActivity extends RxAppCompatActivity
 
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
-            Drawable upArrow;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha, null);
-            } else {
-                upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-            }
+            Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.ic_ab_back_mtrl_am_alpha);
             if (upArrow != null) {
-                upArrow.setColorFilter(getResources().getColor(android.R.color.white), PorterDuff.Mode.SRC_IN);
+                upArrow.setColorFilter(ContextCompat.getColor(this, android.R.color.white), PorterDuff.Mode.SRC_IN);
             }
             ab.setHomeAsUpIndicator(upArrow);
             ab.setDisplayHomeAsUpEnabled(true);

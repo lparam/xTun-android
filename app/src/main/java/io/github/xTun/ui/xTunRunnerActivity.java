@@ -18,25 +18,25 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import io.github.xTun.utils.ConfigUtils;
-import io.github.xTun.aidl.IXtunService;
-import io.github.xTun.service.XtunVpnService;
+import io.github.xTun.aidl.IxTunService;
+import io.github.xTun.service.xTunVpnService;
 import io.github.xTun.utils.Constants;
 
-public class XtunRunnerActivity extends Activity {
+public class xTunRunnerActivity extends Activity {
 
     private static final String TAG = "xTun";
 
     private SharedPreferences settings = null;
     private BroadcastReceiver receiver;
-    private IXtunService bgService  = null;
+    private IxTunService bgService  = null;
 
     Handler handler = new Handler();
 
     ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            bgService = IXtunService.Stub.asInterface(service);
-            handler.postDelayed(XtunRunnerActivity.this::startBackgroundService, 1000);
+            bgService = IxTunService.Stub.asInterface(service);
+            handler.postDelayed(xTunRunnerActivity.this::startBackgroundService, 1000);
         }
 
         @Override
@@ -46,7 +46,7 @@ public class XtunRunnerActivity extends Activity {
     };
 
     private void startBackgroundService() {
-        Intent intent = VpnService.prepare(XtunRunnerActivity.this);
+        Intent intent = VpnService.prepare(xTunRunnerActivity.this);
         int REQUEST_CONNECT = 1;
         if (intent != null) {
             startActivityForResult(intent, REQUEST_CONNECT);
@@ -57,10 +57,10 @@ public class XtunRunnerActivity extends Activity {
 
     private void attachService() {
         if (bgService == null) {
-            Intent intent = new Intent(this, XtunVpnService.class);
+            Intent intent = new Intent(this, xTunVpnService.class);
             intent.setAction(Constants.Action.SERVICE);
             bindService(intent, connection, Context.BIND_AUTO_CREATE);
-            startService(new Intent(this, XtunVpnService.class));
+            startService(new Intent(this, xTunVpnService.class));
         }
     }
 

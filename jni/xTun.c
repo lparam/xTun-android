@@ -115,7 +115,7 @@ jniRegisterNativeMethods(JNIEnv *env, const char *className,
 
 static const char *classPathName = "io/github/xTun/xTun";
 static JNINativeMethod methods[] = {
-    { "init", "(Lio/github/xTun/service/XtunVpnService;IIZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z", (void*)init },
+    { "init", "(Lio/github/xTun/service/xTunVpnService;IIZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z", (void*)init },
     { "start", "()V", (void*)start },
     { "stop", "()V", (void*)stop },
 };

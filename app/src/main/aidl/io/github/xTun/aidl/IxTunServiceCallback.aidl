@@ -1,5 +1,5 @@
 package io.github.xTun.aidl;
 
-interface IXtunServiceCallback {
+interface IxTunServiceCallback {
     oneway void stateChanged(int state, String msg);
 }

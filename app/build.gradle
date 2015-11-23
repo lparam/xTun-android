@@ -14,17 +14,12 @@ android {
         applicationId "io.github.xTun"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 100
-        versionName '1.0.1'
+        versionCode 102
+        versionName '1.0.2'
     }
     lintOptions {
         abortOnError true
         disable 'MissingTranslation'
-    }
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude '.readme'
     }
     buildTypes {
         release {
@@ -82,6 +77,6 @@ dependencies {
         transitive = true
     }
     compile 'dnsjava:dnsjava:2.1.7'
-    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.8.4'
 }
