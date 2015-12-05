@@ -198,6 +198,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         String LOCAL_DNS = "114.114.114.114";
         int DNS_ROUTE_PREFIX = 16;
         int VPN_ADDRESS_PREFIX = 16;
+        boolean verbose = false;
 
         Builder builder = new Builder();
         builder.setSession(config.profileName);
@@ -240,7 +241,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         int fd = vpnInterface.getFd();
         String server = String.format("%s:%d", config.server, config.remotePort);
         String domainPath = createDomains();
-        boolean ret = xTun.init(this, fd, config.mtu, global, false, server, config.password, LOCAL_DNS, domainPath);
+        boolean ret = xTun.init(this, fd, config.mtu, global, verbose, server, config.password, LOCAL_DNS, domainPath);
         if (ret) {
             handler.sendEmptyMessage(CONNECTED);
             xTun.start();
