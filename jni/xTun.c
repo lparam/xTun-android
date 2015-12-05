@@ -84,10 +84,10 @@ start(JNIEnv *env, jobject thiz) {
 
 static void
 stop(JNIEnv *env, jobject thiz) {
-    tun_stop(tun);
     if (!global) {
         dns_destroy();
     }
+    tun_stop(tun);
 }
 
 static int
