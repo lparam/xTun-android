@@ -56,8 +56,6 @@ import rx.util.async.Async;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
-    private String TAG = "xTun";
-
     private Switch switchButton;
     private ProgressDialog progressDialog = null;
     private PrefsFragment prefsFragment;
@@ -87,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private PreferenceBroadcastReceiver preferenceReceiver = new PreferenceBroadcastReceiver();
 
     private IxTunService vpnService;
+
     IxTunServiceCallback.Stub callback = new IxTunServiceCallback.Stub() {
         @Override
         public void stateChanged(int state, String msg) {
@@ -100,18 +99,27 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             vpnService = IxTunService.Stub.asInterface(service);
             try {
                 vpnService.registerCallback(callback);
-                if (switchButton != null) switchButton.setEnabled(true);
+
+                if (switchButton != null) {
+                    switchButton.setEnabled(true);
+                }
+
                 if (Constants.State.isAvailable(vpnService.getState())) {
                     prefsFragment.setPreferenceEnabled(true);
+
                 } else {
                     changeSwitch(true);
                     prefsFragment.setPreferenceEnabled(false);
                 }
+
                 state = Constants.State.values()[vpnService.getState()];
+
             } catch (RemoteException e) {
                 // ignore
             }
-            if (switchButton != null) switchButton.setOnCheckedChangeListener(MainActivity.this);
+            if (switchButton != null) {
+                switchButton.setOnCheckedChangeListener(MainActivity.this);
+            }
         }
 
         @Override
@@ -302,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             serviceStart();
         } else {
             cancelStart();
+            String TAG = "xTun";
             Log.e(TAG, "Failed to start VpnService");
         }
     }

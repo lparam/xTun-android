@@ -1,6 +1,13 @@
 package io.github.xTun.utils;
 
 public class Constants {
+    public static final int DefaultMTU = 1426;
+    public static final int DefaultPort = 1082;
+    public static final int TCP = 1;
+    public static final int UDP = 2;
+    public static final String DefaultIP = "10.0.0.3";
+    public static final String DefaultProfileName = "Untitled";
+
     public class Route {
         public static final String ALL = "all";
         public static final String BYPASS_LAN = "bypass-lan";
@@ -38,6 +45,7 @@ public class Constants {
         public static final String status = "status";
         public static final String proxyedApps = "proxyedApps";
         public static final String route = "route";
+        public static final String protocol = "protocol";
 
         public static final String isAutoConnect = "isAutoConnect";
 

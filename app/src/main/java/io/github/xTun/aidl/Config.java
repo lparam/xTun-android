@@ -3,20 +3,23 @@ package io.github.xTun.aidl;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.github.xTun.utils.Constants;
+
 public class Config implements Parcelable {
 
     public boolean isGlobalProxy = true;
     public boolean isBypassApps = false;
 
-    public String profileName = "Untitled";
-    public String localIP = "10.0.0.3";
+    public String profileName = Constants.DefaultProfileName;
+    public String localIP = Constants.DefaultIP;
     public String server = "";
     public String password = "";
-    public String route = "all";
+    public String route = Constants.Route.ALL;
     public String proxiedAppString = "";
 
-    public int remotePort = 1082;
-    public int mtu = 1440;
+    public int remotePort = Constants.DefaultPort;
+    public int mtu = Constants.DefaultMTU;
+    public int protocol = Constants.UDP;
 
     public static final Parcelable.Creator<Config> CREATOR = new Parcelable.Creator<Config>() {
         public Config createFromParcel(Parcel in) {
@@ -30,7 +33,7 @@ public class Config implements Parcelable {
 
     public Config(boolean isGlobalProxy, boolean isBypassApps,
                   String profileName, String localIP, String server, String password,
-                  String proxiedAppString, String route, int remotePort, int mtu) {
+                  String proxiedAppString, String route, int remotePort, int mtu, int protocol) {
         this.isGlobalProxy = isGlobalProxy;
         this.isBypassApps = isBypassApps;
         this.profileName = profileName;
@@ -41,6 +44,7 @@ public class Config implements Parcelable {
         this.route = route;
         this.remotePort = remotePort;
         this.mtu = mtu;
+        this.protocol = protocol;
     }
 
     private Config(Parcel in) {
@@ -58,6 +62,7 @@ public class Config implements Parcelable {
         route = in.readString();
         remotePort = in.readInt();
         mtu = in.readInt();
+        protocol = in.readInt();
     }
 
     @Override
@@ -77,5 +82,6 @@ public class Config implements Parcelable {
         out.writeString(route);
         out.writeInt(remotePort);
         out.writeInt(mtu);
+        out.writeInt(protocol);
     }
 }

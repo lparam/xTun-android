@@ -29,13 +29,14 @@ public class ConfigUtils {
         String password = settings.getString(Constants.Key.password, "");
         String route = settings.getString(Constants.Key.route, "all");
 
-        int remotePort = Integer.parseInt(settings.getString(Constants.Key.remotePort, "1082"));
-        int mtu = Integer.parseInt(settings.getString(Constants.Key.mtu, "1440"));
+        int remotePort = Integer.parseInt(settings.getString(Constants.Key.remotePort, Integer.toString(Constants.DefaultPort)));
+        int mtu = Integer.parseInt(settings.getString(Constants.Key.mtu, Integer.toString(Constants.DefaultMTU)));
+        int protocol = Integer.parseInt(settings.getString(Constants.Key.protocol, Integer.toString(Constants.UDP)), 16);
 
         String proxiedAppString = settings.getString(Constants.Key.proxied, "");
 
         return new Config(isGlobalProxy, isBypassApps, profileName, localIP, server,
-                password, proxiedAppString, route, remotePort, mtu);
+                           password, proxiedAppString, route, remotePort, mtu, protocol);
     }
 
 }

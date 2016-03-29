@@ -2,21 +2,25 @@ package io.github.xTun.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.github.xTun.utils.Constants;
+
 public class Profile {
     @SerializedName("id")
     private int id = 0;
     @SerializedName("name")
-    private String name = "Untitled";
+    private String name = Constants.DefaultProfileName;
     @SerializedName("localIP")
-    private String localIP = "10.0.0.3";
+    private String localIP = Constants.DefaultIP;
     @SerializedName("host")
     private String host = "";
     @SerializedName("remotePort")
-    private int remotePort = 1082;
+    private int remotePort = Constants.DefaultPort;
     @SerializedName("mtu")
-    private int mtu = 1440;
+    private int mtu = Constants.DefaultMTU;
     @SerializedName("password")
     private String password = "";
+    @SerializedName("protocol")
+    private int protocol = Constants.UDP;
     @SerializedName("route")
     private String route = "all";
     @SerializedName("global")
@@ -51,6 +55,10 @@ public class Profile {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setProtocol(int protocol) {
+        this.protocol = protocol;
     }
 
     public void setRoute(String route) {
@@ -91,6 +99,10 @@ public class Profile {
 
     public String getPassword() {
         return password;
+    }
+
+    public int getProtocol() {
+        return protocol;
     }
 
     public String getRoute() {

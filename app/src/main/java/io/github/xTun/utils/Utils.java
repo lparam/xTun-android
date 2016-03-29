@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import io.github.xTun.BuildConfig;
 
 public class Utils {
-    private static String TAG = "Xtun";
+    private static String TAG = "xTun";
 
     public static boolean isLollipopOrAbove() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;

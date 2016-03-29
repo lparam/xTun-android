@@ -1,7 +1,6 @@
 #include <errno.h>
 #include <resolv.h>
 #include <stddef.h>
-/* #include "local_ns_parser.h" */
 
 static void local_ns_setsection(ns_msg *msg, ns_sect sect);
 static int local_ns_skiprr(const unsigned char *ptr, const unsigned char *eom, ns_sect section, int count);
@@ -64,6 +63,7 @@ int local_ns_initparse(const unsigned char *msg, int msglen, ns_msg *handle)
 	local_ns_setsection(handle, ns_s_max);
 	return 0;
 }
+
 int local_ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr)
 {
 	int b;
@@ -133,6 +133,7 @@ int local_ns_parserr(ns_msg *handle, ns_sect section, int rrnum, ns_rr *rr)
 
 	return 0;
 }
+
 static void local_ns_setsection(ns_msg *msg, ns_sect sect)
 {
 	msg->_sect = sect;
@@ -144,6 +145,7 @@ static void local_ns_setsection(ns_msg *msg, ns_sect sect)
 		msg->LOCAL_NS_MSG_PTR = msg->_sections[(int)sect];
 	}
 }
+
 static int local_ns_skiprr(const unsigned char *ptr, const unsigned char *eom, ns_sect section, int count)
 {
 	const unsigned char *optr = ptr;
@@ -176,6 +178,7 @@ static int local_ns_skiprr(const unsigned char *ptr, const unsigned char *eom, n
 
 	return ptr - optr;
 }
+
 static int local_ns_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
 {
 	const unsigned char *saveptr = ptr;
@@ -185,6 +188,7 @@ static int local_ns_dn_skipname(const unsigned char *ptr, const unsigned char *e
 
 	return ptr - saveptr;
 }
+
 static int local_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
 {
 	const unsigned char *cp;
@@ -225,6 +229,7 @@ static int local_ns_name_skip(const unsigned char **ptrptr, const unsigned char 
 
 	return 0;
 }
+
 static int local_ns_labellen(const unsigned char *lp)
 {
 	int bitlen;
