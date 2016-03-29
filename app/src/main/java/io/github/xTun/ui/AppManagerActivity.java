@@ -234,12 +234,12 @@ public class AppManagerActivity extends RxAppCompatActivity
                             ProxiedApp app = apps[position];
                             DisplayImageOptions options =
                                     new DisplayImageOptions.Builder()
-                                            .showStubImage(STUB)
+                                            .showImageOnLoading(STUB)
                                             .showImageForEmptyUri(STUB)
                                             .showImageOnFail(STUB)
                                             .resetViewBeforeLoading()
-                                            .cacheInMemory()
-                                            .cacheOnDisc()
+                                            .cacheInMemory(true)
+                                            .cacheOnDisc(true)
                                             .displayer(new FadeInBitmapDisplayer(300))
                                             .build();
                             ImageLoader.getInstance().displayImage(Constants.Scheme.APP + app.getPackageName(), entry.icon, options);

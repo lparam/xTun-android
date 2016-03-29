@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -43,15 +42,23 @@ public class ProfileManager {
         profile.setRoute(settings.getString(Constants.Key.route, "all"));
 
         try {
-            profile.setRemotePort(Integer.valueOf(settings.getString(Constants.Key.remotePort, "1082")));
+            profile.setRemotePort(Integer.valueOf(settings.getString(Constants.Key.remotePort, Integer.toString(Constants.DefaultPort))));
         } catch (NumberFormatException ex) {
-            profile.setRemotePort(1082);
+            profile.setRemotePort(Constants.DefaultPort);
         }
 
+        int defaultMTU = Constants.DefaultMTU;
         try {
-            profile.setMTU(Integer.valueOf(settings.getString(Constants.Key.mtu, "1440")));
+            profile.setMTU(Integer.valueOf(settings.getString(Constants.Key.mtu, Integer.toString(defaultMTU))));
         } catch (NumberFormatException ex) {
-            profile.setMTU(1440);
+            profile.setMTU(defaultMTU);
+        }
+
+        int defaultProtocol = Constants.UDP;
+        try {
+            profile.setProtocol(Integer.valueOf(settings.getString(Constants.Key.protocol, Integer.toString(defaultProtocol))));
+        } catch (NumberFormatException ex) {
+            profile.setProtocol(defaultProtocol);
         }
 
         profile.setIndividual(settings.getString(Constants.Key.proxied, ""));
@@ -68,6 +75,7 @@ public class ProfileManager {
         edit.putString(Constants.Key.password, profile.getPassword());
         edit.putString(Constants.Key.remotePort, Integer.toString(profile.getRemotePort()));
         edit.putString(Constants.Key.mtu, Integer.toString(profile.getMTU()));
+        edit.putString(Constants.Key.protocol, Integer.toString(profile.getProtocol()));
         edit.putString(Constants.Key.proxied, profile.getIndividual());
         edit.putInt(Constants.Key.profileId, profile.getId());
         edit.putString(Constants.Key.route, profile.getRoute());
@@ -90,10 +98,14 @@ public class ProfileManager {
                 sb.append(line);
             }
             String json = sb.toString();
+            if (json.isEmpty()) {
+                return new Profiles();
+            }
             Gson gson = new Gson();
             return gson.fromJson(json, Profiles.class);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Log.e(TAG, "reload all profile from json file");
             return new Profiles();
         }
     }
@@ -125,27 +137,29 @@ public class ProfileManager {
     }
 
     private void saveAll() {
-        FileOutputStream outputStream;
-
         try {
             Gson gson = new Gson();
             String json = gson.toJson(profiles);
-            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
             outputStream.write(json.getBytes());
             outputStream.close();
         } catch (Exception e) {
-            Log.e(TAG, "save", e);
+            Log.e(TAG, "save profile", e);
         }
     }
 
     public Profile save() {
         int id = settings.getInt(Constants.Key.profileId, -1);
-        Profile profile = profiles.getProfile(id);
-        if (profile != null) {
-            profile = loadFromPreferences(profile);
-            saveAll();
+        if (profiles != null) {
+            Profile profile = profiles.getProfile(id);
+            if (profile != null) {
+                profile = loadFromPreferences(profile);
+                saveAll();
+            }
+            return profile;
+        } else {
+            return null;
         }
-        return profile;
     }
 
     public Profile getProfile(int id) {
@@ -157,7 +171,7 @@ public class ProfileManager {
             profiles.remove(id);
             saveAll();
         } catch (Exception ex) {
-            Log.e(TAG, "getProfile", ex);
+            Log.e(TAG, "delete profile", ex);
         }
     }
 

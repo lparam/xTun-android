@@ -7,7 +7,7 @@
 
 #include "crypto.h"
 #include "logger.h"
-#include "tun.h"
+#include "xTun.h"
 
 
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
@@ -16,34 +16,36 @@ static struct tundev *tun;
 
 static JavaVM *jvm;
 static jobject vpnServiceObj;
-static jmethodID protect_socket;
+static jmethodID protectSocket;
 static jboolean global;
 
 
 int
-protectSocket(int fd) {
+protect_socket(int fd) {
     JNIEnv *env = NULL;
 
     if ((*jvm)->GetEnv(jvm, (void**)&env, JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
 
-    return (*env)->CallBooleanMethod(env, vpnServiceObj, protect_socket, fd);
+    return (*env)->CallBooleanMethod(env, vpnServiceObj, protectSocket, fd);
 }
 
 static jboolean
 init(JNIEnv *env, jobject thiz,
-     jobject obj, jint fd, jint mtu, jboolean isGlobalProxy, jboolean verbose,
-     jstring server, jstring password, jstring dns, jstring domain_path) {
+     jobject obj, jstring ifconf, jint fd, jint mtu, jint protocol,
+     jboolean isGlobal, jboolean verbose, jstring server, jint port,
+     jstring password, jstring dns, jstring domain_path) {
 
     jboolean rc = JNI_FALSE;
 
     vpnServiceObj = (*env)->NewGlobalRef(env, obj);
     jclass vpnService = (*env)->GetObjectClass(env, vpnServiceObj);
-    protect_socket = (*env)->GetMethodID(env, vpnService, "protectSocket", "(I)Z");
+    protectSocket = (*env)->GetMethodID(env, vpnService, "protectSocket", "(I)Z");
 
     (*env)->DeleteLocalRef(env, vpnService);
 
+    const char *c_ifconf = (*env)->GetStringUTFChars(env, ifconf, NULL);
     const char *c_server = (*env)->GetStringUTFChars(env, server, NULL);
     const char *c_password = (*env)->GetStringUTFChars(env, password, NULL);
     const char *c_dns = (*env)->GetStringUTFChars(env, dns, NULL);
@@ -54,21 +56,24 @@ init(JNIEnv *env, jobject thiz,
         goto clean;
     }
 
-    global = isGlobalProxy;
-    if (!isGlobalProxy) {
-        if ( dns_init(c_domain_path)) {
+    global = isGlobal;
+    if (!global) {
+        if (dns_init(c_domain_path)) {
             goto clean;
         }
     }
 
     tun = tun_alloc();
-    if (tun_config(tun, fd, mtu, isGlobalProxy, verbose, c_server, c_dns)) {
+    if (tun_config(tun, c_ifconf, fd, mtu, protocol, global, verbose, c_server,
+                   port, c_dns))
+    {
         tun_free(tun);
     } else {
         rc = JNI_TRUE;
     }
 
 clean:
+    (*env)->ReleaseStringUTFChars(env, ifconf, c_ifconf);
     (*env)->ReleaseStringUTFChars(env, server, c_server);
     (*env)->ReleaseStringUTFChars(env, password, c_password);
     (*env)->ReleaseStringUTFChars(env, dns, c_dns);
@@ -115,7 +120,7 @@ jniRegisterNativeMethods(JNIEnv *env, const char *className,
 
 static const char *classPathName = "io/github/xTun/xTun";
 static JNINativeMethod methods[] = {
-    { "init", "(Lio/github/xTun/service/xTunVpnService;IIZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z", (void*)init },
+    { "init", "(Lio/github/xTun/service/xTunVpnService;Ljava/lang/String;IIIZZLjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z", (void *)init },
     { "start", "()V", (void*)start },
     { "stop", "()V", (void*)stop },
 };

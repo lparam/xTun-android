@@ -10,7 +10,7 @@ import android.preference.PreferenceManager;
 import io.github.xTun.ui.xTunRunnerActivity;
 import io.github.xTun.utils.Constants;
 
-public class xTunReceiver extends BroadcastReceiver{
+public class xTunReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -22,6 +22,7 @@ public class xTunReceiver extends BroadcastReceiver{
         } catch (PackageManager.NameNotFoundException e) {
             versionName = null;
         }
+
         boolean isAutoConnect = settings.getBoolean(Constants.Key.isAutoConnect, false);
         boolean isInstalled = status.getBoolean(versionName, false);
         if (isAutoConnect && isInstalled) {

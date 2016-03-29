@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Locale;
 
 import io.github.xTun.R;
 import io.github.xTun.aidl.Config;
@@ -76,7 +77,10 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
                 callbacks.unregister(cb);
                 callbackCount -= 1;
             }
-            if (callbackCount == 0 && state != Constants.State.CONNECTING && state != Constants.State.CONNECTED) {
+            if (callbackCount == 0
+                    && state != Constants.State.CONNECTING
+                    && state != Constants.State.CONNECTED)
+            {
                 stopSelf();
             }
         }
@@ -146,8 +150,8 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
     private void route_foreign(Builder builder) {
         String line;
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
+        final BufferedReader reader =
+                new BufferedReader(new InputStreamReader(
                         this.getResources().openRawResource(R.raw.route_foreign)));
 
         try {
@@ -196,16 +200,16 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         String DNS = "8.8.8.8";
         String DNS_ROUTE = "8.8.0.0";
         String LOCAL_DNS = "114.114.114.114";
-        int DNS_ROUTE_PREFIX = 16;
-        int VPN_ADDRESS_PREFIX = 16;
-        boolean verbose = false;
+        int DNS_ROUTE_CIDR = 16;
+        int VPN_CIDR = 24;
+        boolean verbose = true;
 
         Builder builder = new Builder();
         builder.setSession(config.profileName);
         builder.setMtu(config.mtu);
-        builder.addAddress(config.localIP, VPN_ADDRESS_PREFIX);
+        builder.addAddress(config.localIP, VPN_CIDR);
         builder.addDnsServer(DNS);
-        builder.addRoute(DNS_ROUTE, DNS_ROUTE_PREFIX);
+        builder.addRoute(DNS_ROUTE, DNS_ROUTE_CIDR);
 
         if (Utils.isLollipopOrAbove()) {
             try {
@@ -238,10 +242,12 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
         vpnInterface = builder.establish();
 
+        String ifconf = String.format(Locale.ENGLISH, "%s/%d", config.localIP, VPN_CIDR);
         int fd = vpnInterface.getFd();
-        String server = String.format("%s:%d", config.server, config.remotePort);
         String domainPath = createDomains();
-        boolean ret = xTun.init(this, fd, config.mtu, global, verbose, server, config.password, LOCAL_DNS, domainPath);
+        boolean ret = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
+                                  config.server, config.remotePort, config.password,
+                                  LOCAL_DNS, domainPath);
         if (ret) {
             handler.sendEmptyMessage(CONNECTED);
             xTun.start();
@@ -368,8 +374,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
             case CONNECTED:
                 notifyForegroundAlert(
                         getString(R.string.forward_success),
-                        getString(R.string.service_running, config.profileName),
-                        false);
+                        getString(R.string.service_running, config.profileName), false);
                 changeState(Constants.State.CONNECTED);
                 break;
             case STOPPED:
@@ -386,7 +391,11 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     }
 
     public boolean protectSocket(int socket) {
-        return protect(socket);
+        boolean rc = protect(socket);
+        if (!rc) {
+            Log.e(TAG, "Protect socket failed.");
+        }
+        return rc;
     }
 
 }

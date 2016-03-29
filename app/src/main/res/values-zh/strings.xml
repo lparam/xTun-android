@@ -30,6 +30,7 @@
   <string name="feature_cat">功能设置</string>
   <string name="route_list">路由</string>
   <string name="route_list_summary">绕过指定路由列表中的地址</string>
+  <string name="protocol_list">协议</string>
   <string name="auto_set_proxy">全局代理</string>
   <string name="auto_set_proxy_summary">设置系统代理</string>
   <string name="proxied_apps">分应用代理</string>
