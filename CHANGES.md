@@ -1,3 +1,8 @@
+v1.1.0 (2016-3-29)
+-----------
+* Change: TCP support
+
+
 v1.0.2 (2015-11-22)
 -----------
 * Change: some minor fixes
