@@ -165,10 +165,10 @@ public class AppManagerActivity extends RxAppCompatActivity
         ArrayList<ProxiedApp> appList = new ArrayList<>();
 
         for (ApplicationInfo a : infoList) {
-            if ((a.uid >= 10000)
-                    && packageManager.getApplicationLabel(a) != null
-                    && packageManager.getApplicationIcon(a) != null) {
-                String name = packageManager.getApplicationLabel(a).toString();
+            CharSequence label = packageManager.getApplicationLabel(a);
+            //Drawable icon = packageManager.getApplicationIcon(a);
+            if ((a.uid >= 10000) && label != null) {
+                String name = label.toString();
                 String userName = Integer.toString(a.uid);
                 int index = Arrays.binarySearch(appString, userName);
                 boolean proxied = index >= 0;
