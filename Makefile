@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 
 LIB_SYSTEM=app/src/main/jniLibs/armeabi/libxTun.so
 
