@@ -3,7 +3,6 @@ package io.github.xTun.ui;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.backup.BackupManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,7 +12,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.VpnService;
 import android.os.Bundle;
@@ -27,13 +25,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.adapter.DrawerAdapter;
+import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
@@ -42,6 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import hu.akarnokd.rxjava2.async.AsyncFlowable;
+import io.github.xTun.BuildConfig;
 import io.github.xTun.R;
 import io.github.xTun.aidl.IxTunService;
 import io.github.xTun.aidl.IxTunServiceCallback;
@@ -50,17 +53,16 @@ import io.github.xTun.service.xTunVpnService;
 import io.github.xTun.store.ProfileManager;
 import io.github.xTun.utils.ConfigUtils;
 import io.github.xTun.utils.Constants;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.util.async.Async;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     private Switch switchButton;
     private ProgressDialog progressDialog = null;
     private PrefsFragment prefsFragment;
-    private Drawer.Result drawer;
-    private DrawerAdapter adapter;
+    private Drawer drawer;
 
     private Handler handler;
 
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (!status.getBoolean(getVersionName(), false)) {
             progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, false);
             status.edit().putBoolean(getVersionName(), true).apply();
-            Async.toAsync(this::reset).call()
+            AsyncFlowable.toAsync(this::reset).call()
                     .observeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(o -> clearDialog());
@@ -168,70 +170,65 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (tf != null) title.setTypeface(tf);
 
         ArrayList<IDrawerItem> items = getDrawerItems();
-        adapter = new DrawerAdapter(this, items);
 
-        drawer = new Drawer()
+        drawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
-                .withAdapter(adapter)
                 .withDrawerItems(items)
-                .withOnDrawerItemClickListener((adapterView, view, position, id, drawerItem) -> {
-                    if (drawerItem instanceof ProfileDrawerItem) {
-                        ProfileDrawerItem item = (ProfileDrawerItem) drawerItem;
-                        int profileId = item.getProfileId();
-                        updateProfile(profileId);
-                        return;
-                    }
+                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
                     if (drawerItem != null) {
-                        int identity = drawerItem.getIdentifier();
-                        if (identity == -1) return;
-                        Action action = Action.values()[identity];
-                        switch (action) {
-                            case ADD:
-                                addProfile();
-                                break;
-                            case RECOVERY:
-                                recovery();
-                                break;
-                            case ABOUT:
-                                showAbout();
-                                break;
-                            default:
-                                break;
+                        if (drawerItem instanceof ProfileDrawerItem) {
+                            ProfileDrawerItem item = (ProfileDrawerItem) drawerItem;
+                            int profileId = item.getProfileId();
+                            updateProfile(profileId);
+                            return false;
+                        } else {
+                            int identity = (int) drawerItem.getIdentifier();
+                            if (identity == -1) return false;
+                            Action action = Action.values()[identity];
+                            switch (action) {
+                                case ADD:
+                                    addProfile();
+                                    break;
+                                case RECOVERY:
+                                    recovery();
+                                    break;
+                                case ABOUT:
+                                    showAbout();
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
+                    return false;
                 })
-                .withOnDrawerItemLongClickListener((adapterView, view, position, id, drawerItem) -> {
+                .withOnDrawerItemLongClickListener((view, position, drawerItem) -> {
                     if (drawerItem instanceof ProfileDrawerItem) {
                         ProfileDrawerItem item = (ProfileDrawerItem) drawerItem;
                         new AlertDialog.Builder(MainActivity.this)
                                 .setMessage(String.format(Locale.ENGLISH, getString(R.string.remove_profile), item.getName()))
                                 .setCancelable(false)
-                                .setNegativeButton(R.string.no, (dialog, which) -> {
-                                    dialog.cancel();
-                                })
+                                .setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel())
                                 .setPositiveButton(R.string.yes, (dialog, which) -> {
                                     delProfile(item.getProfileId());
                                     dialog.dismiss();
                                 })
                                 .create()
                                 .show();
-
                         return true;
                     }
                     return false;
                 })
                 .build();
 
-        drawer.getListView().setVerticalScrollBarEnabled(false);
-
         prefsFragment = new PrefsFragment();
         getFragmentManager().beginTransaction().replace(R.id.content, prefsFragment).commit();
 
         registerReceiver(preferenceReceiver, new IntentFilter(Constants.Action.UPDATE_PREFS));
 
-        //Async.runAsync(Schedulers.newThread(), (observer, subscription) -> attachService());
-        attachService();
+        AsyncFlowable.runAsync(Schedulers.newThread(), (observer, subscription) -> attachService());
+        //attachService();
     }
 
     @Override
@@ -383,11 +380,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         List<Profile> profiles = profileManager.getAllProfile();
         if (profiles != null) {
             for (Profile profile : profiles) {
-                ProfileDrawerItem item = new ProfileDrawerItem()
-                        .withName(profile.getName())
+                ProfileDrawerItem item = new ProfileDrawerItem().withName(profile.getName())
                         .withProfileId(profile.getId())
                         .withIcon(GoogleMaterial.Icon.gmd_computer)
-                        .withCheckable(false);
+                        .withSelectable(false);
                 items.add(item);
             }
         }
@@ -396,22 +392,26 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private ArrayList<IDrawerItem> getDrawerItems() {
         SectionDrawerItem profileItem = new SectionDrawerItem().withName(R.string.profiles)
-                .withTextColorRes(R.color.accentColor).setDivider(false);
+                .withTextColorRes(R.color.accentColor)
+                .withDivider(false);
 
         PrimaryDrawerItem addItem = new PrimaryDrawerItem().withName(R.string.add_profile)
-                .withIdentifier(Action.ADD.ordinal()).withIcon(GoogleMaterial.Icon.gmd_add_circle_outline)
-                .withCheckable(false);
+                .withIdentifier(Action.ADD.ordinal())
+                .withIcon(GoogleMaterial.Icon.gmd_add_circle_outline)
+                .withSelectable(false);
 
         SectionDrawerItem settingItem = new SectionDrawerItem().withName(R.string.settings)
                 .withTextColorRes(R.color.accentColor);
 
         PrimaryDrawerItem recoveryItem = new PrimaryDrawerItem().withName(R.string.recovery)
-                .withIdentifier(Action.RECOVERY.ordinal()).withIcon(GoogleMaterial.Icon.gmd_restore)
-                .withCheckable(false);
+                .withIdentifier(Action.RECOVERY.ordinal())
+                .withIcon(GoogleMaterial.Icon.gmd_restore)
+                .withSelectable(false);
 
         PrimaryDrawerItem aboutItem = new PrimaryDrawerItem().withName(R.string.about)
-                .withIdentifier(Action.ABOUT.ordinal()).withIcon(GoogleMaterial.Icon.gmd_info_outline)
-                .withCheckable(false);
+                .withIdentifier(Action.ABOUT.ordinal())
+                .withIcon(GoogleMaterial.Icon.gmd_info_outline)
+                .withSelectable(false);
 
         ArrayList<IDrawerItem> items = new ArrayList<>();
         items.add(profileItem);
@@ -454,23 +454,29 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         Handler h = createDialogHandler();
         handler.postDelayed(() -> {
             currentProfile = profileManager.reload(id);
-            adapter.notifyDataSetChanged();
             prefsFragment.updatePreferenceScreen(currentProfile);
             h.sendEmptyMessage(0);
         }, 600);
     }
 
     private void showAbout() {
-        Intent intent = new Intent(this, AboutActivity.class);
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException ex) {
-            Snackbar.make(drawer.getDrawerLayout(),
-                    "There are no email applications installed.",
-                    Snackbar.LENGTH_LONG)
-                    .setActionTextColor(Color.RED)
-                    .show();
-        }
+        Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+        MainActivity.this.startActivity(intent);
+/*        WebView web = new WebView(MainActivity.this);
+        web.loadUrl("file:///android_asset/pages/about.html");
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                view.loadUrl(request.toString());
+                return true;
+            }
+        });
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(String.format(Locale.ENGLISH, getString(R.string.about_title), BuildConfig.VERSION_NAME))
+                .setNegativeButton(getString(android.R.string.ok), null)
+                .setView(web)
+                .create()
+                .show();*/
     }
 
     private Handler createDialogHandler() {

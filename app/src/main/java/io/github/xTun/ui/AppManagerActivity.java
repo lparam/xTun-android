@@ -11,6 +11,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -31,7 +32,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,13 +44,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import hu.akarnokd.rxjava2.async.AsyncFlowable;
 import io.github.xTun.R;
 import io.github.xTun.model.ProxiedApp;
 import io.github.xTun.utils.Constants;
 import io.github.xTun.utils.Utils;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.util.async.Async;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class AppManagerActivity extends RxAppCompatActivity
@@ -64,11 +65,11 @@ public class AppManagerActivity extends RxAppCompatActivity
 
     private class AppIconDownloader extends BaseImageDownloader {
 
-        public AppIconDownloader(Context context, int connectTimeout, int readTimeout) {
+        AppIconDownloader(Context context, int connectTimeout, int readTimeout) {
             super(context, connectTimeout, readTimeout);
         }
 
-        public AppIconDownloader(Context context) {
+        AppIconDownloader(Context context) {
             this(context, 0, 0);
         }
 
@@ -89,13 +90,13 @@ public class AppManagerActivity extends RxAppCompatActivity
         private TextView text;
         private ImageView icon;
 
-        public ListEntry(CheckBox box, TextView text, ImageView icon) {
+        ListEntry(CheckBox box, TextView text, ImageView icon) {
             this.box = box;
             this.text = text;
             this.icon = icon;
         }
 
-        public CheckBox getBox() {
+        CheckBox getBox() {
             return box;
         }
 
@@ -206,15 +207,17 @@ public class AppManagerActivity extends RxAppCompatActivity
         progressDialog = ProgressDialog
                 .show(AppManagerActivity.this, "", getString(R.string.loading), true, true);
 
-        Async.toAsync(this::getApps).call(this)
+        AsyncFlowable.toAsync(this::getApps)
+                .apply(this)
                 .observeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(bindToLifecycle())
                 .subscribe(apps -> {
                     this.apps = apps;
                     adapter = new ArrayAdapter<ProxiedApp>(this, R.layout.apps_item, R.id.itemtext, apps) {
+                        @NonNull
                         @Override
-                        public View getView(int position, View view, ViewGroup parent) {
+                        public View getView(int position, View view, @NonNull ViewGroup parent) {
                             View convertView = view;
                             ListEntry entry;
                             if (convertView == null) {
@@ -237,9 +240,9 @@ public class AppManagerActivity extends RxAppCompatActivity
                                             .showImageOnLoading(STUB)
                                             .showImageForEmptyUri(STUB)
                                             .showImageOnFail(STUB)
-                                            .resetViewBeforeLoading()
+                                            .resetViewBeforeLoading(true)
                                             .cacheInMemory(true)
-                                            .cacheOnDisc(true)
+                                            .cacheOnDisk(true)
                                             .displayer(new FadeInBitmapDisplayer(300))
                                             .build();
                             ImageLoader.getInstance().displayImage(Constants.Scheme.APP + app.getPackageName(), entry.icon, options);

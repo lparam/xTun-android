@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 
 if(file('../sign.gradle').exists()) {
     apply from: '../sign.gradle'
@@ -8,18 +7,21 @@ if(file('../sign.gradle').exists()) {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.1'
     defaultConfig {
         applicationId "io.github.xTun"
         minSdkVersion 18
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 110
-        versionName '1.1.0'
+        versionName '1.1.1'
+        jackOptions {
+            enabled true
+        }
     }
     lintOptions {
-        abortOnError true
         disable 'MissingTranslation'
+        abortOnError true
     }
     buildTypes {
         release {
@@ -45,6 +47,7 @@ android {
     }
     packagingOptions {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/rxjava.properties'
     }
     productFlavors {
     }
@@ -66,17 +69,20 @@ def appendVersionNameVersionCode(variant, output, defaultConfig) {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:design:23.2.1'
-    compile 'com.android.support:support-annotations:23.2.1'
-    compile 'io.reactivex:rxjava:1.1.2'
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava-async-util:0.21.0'
-    compile 'com.trello:rxlifecycle:0.5.0'
-    compile 'com.trello:rxlifecycle-components:0.5.0'
-    compile('com.mikepenz.materialdrawer:library:2.9.8@aar') {
+    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:support-annotations:25.0.1'
+    compile "com.android.support:appcompat-v7:25.0.1"
+    compile 'io.reactivex.rxjava2:rxjava:2.0.2'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'com.github.akarnokd:rxjava2-extensions:0.10.0'
+    compile 'com.trello.rxlifecycle2:rxlifecycle:2.0.1'
+    compile 'com.trello.rxlifecycle2:rxlifecycle-components:2.0.1'
+    compile('com.mikepenz:materialdrawer:5.8.0@aar') {
         transitive = true
     }
+    compile "com.mikepenz:iconics-core:2.8.1@aar"
+    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
     compile 'dnsjava:dnsjava:2.1.7'
-    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }
