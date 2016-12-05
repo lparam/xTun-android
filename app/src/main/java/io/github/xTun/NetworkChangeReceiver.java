@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-
 public class NetworkChangeReceiver extends BroadcastReceiver {
     private static final String TAG = "xTun";
 

@@ -1,23 +1,10 @@
 package io.github.xTun.utils;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import io.github.xTun.aidl.Config;
 
 public class ConfigUtils {
-
-    public static boolean printToFile(java.io.File file, String content) {
-        try {
-            java.io.PrintWriter printer = new java.io.PrintWriter(file);
-            printer.println(content);
-            printer.flush();
-            return true;
-        } catch (Exception ex) {
-            Log.e("xTun", ex.getMessage());
-            return false;
-        }
-    }
 
     public static Config load(SharedPreferences settings) {
         boolean isGlobalProxy = settings.getBoolean(Constants.Key.isGlobalProxy, false);
