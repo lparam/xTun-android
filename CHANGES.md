@@ -1,4 +1,4 @@
-v1.1.0 (2019-10-25)
+v1.2.0 (2019-10-25)
 -----------
 * Change: upgrade SDK & NDK to latest
 * Change: don't resolve domain names locally
