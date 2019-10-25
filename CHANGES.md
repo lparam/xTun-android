@@ -1,3 +1,9 @@
+v1.1.0 (2019-10-25)
+-----------
+* Change: upgrade SDK & NDK to latest
+* Change: don't resolve domain names locally
+
+
 v1.1.0 (2016-3-29)
 -----------
 * Change: TCP support
