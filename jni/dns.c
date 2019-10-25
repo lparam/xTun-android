@@ -166,5 +166,5 @@ dns_destroy() {
     free(black_list.domains);
     black_list.elements = 0;
 
-    logger_log(LOG_WARNING, "DNS filter stoped.");
+    logger_log(LOG_NOTICE, "DNS filter stoped.");
 }

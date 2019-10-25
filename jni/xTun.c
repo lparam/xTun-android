@@ -57,11 +57,11 @@ init(JNIEnv *env, jobject thiz,
     }
 
     global = isGlobal;
-    if (!global) {
+    /*if (!global) {
         if (dns_init(c_domain_path)) {
             goto clean;
         }
-    }
+    }*/
 
     tun = tun_alloc();
     if (tun_config(tun, c_ifconf, fd, mtu, protocol, global, verbose, c_dns))
@@ -93,9 +93,9 @@ start(JNIEnv *env, jobject thiz, jstring server, jint port) {
 
 static void
 stop(JNIEnv *env, jobject thiz) {
-    if (!global) {
+    /*if (!global) {
         dns_destroy();
-    }
+    }*/
     tun_stop(tun);
 }
 
