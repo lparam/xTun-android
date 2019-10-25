@@ -24,6 +24,13 @@
 -dontwarn com.nostra13.universalimageloader.**
 -keep class com.nostra13.universalimageloader.** { *; }
 
-# xtun
+# xTun
 -keep class io.github.xTun.model.** { *; }
 -keep class io.github.xTun.service.xTunVpnService { *; }
+
+# native
+-dontwarn android.support.v8.renderscript.*
+-keepclassmembers class android.support.v8.renderscript.RenderScript {
+  native *** rsn*(...);
+  native *** n*(...);
+}

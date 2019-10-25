@@ -8,6 +8,7 @@ import io.github.xTun.utils.Constants;
 public class Config implements Parcelable {
 
     public boolean isGlobalProxy = true;
+    public boolean isProxyApps = false;
     public boolean isBypassApps = false;
 
     public String profileName = Constants.DefaultProfileName;
@@ -31,10 +32,11 @@ public class Config implements Parcelable {
         }
     };
 
-    public Config(boolean isGlobalProxy, boolean isBypassApps,
+    public Config(boolean isGlobalProxy, boolean isProxyApps, boolean isBypassApps,
                   String profileName, String localIP, String server, String password,
                   String proxiedAppString, String route, int remotePort, int mtu, int protocol) {
         this.isGlobalProxy = isGlobalProxy;
+        this.isProxyApps = isProxyApps;
         this.isBypassApps = isBypassApps;
         this.profileName = profileName;
         this.localIP = localIP;
@@ -53,6 +55,7 @@ public class Config implements Parcelable {
 
     public void readFromParcel(Parcel in) {
         isGlobalProxy = in.readInt() == 1;
+        isProxyApps = in.readInt() == 1;
         isBypassApps = in.readInt() == 1;
         profileName = in.readString();
         localIP = in.readString();
@@ -73,6 +76,7 @@ public class Config implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(isGlobalProxy ? 1 : 0);
+        out.writeInt(isProxyApps ? 1 : 0);
         out.writeInt(isBypassApps ? 1 : 0);
         out.writeString(profileName);
         out.writeString(localIP);

@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <resolv.h>
 
+#include "dns.h"
 #include "logger.h"
 
 
@@ -76,10 +77,11 @@ filter_query(uint8_t *buf, int buflen) {
         for (i = 0; i < black_list.elements; i++) {
             int rc = domain_match(host, black_list.domains[i]);
             if (rc) {
-                logger_log(LOG_INFO, "request %s", host);
+                logger_log(LOG_INFO, "query %s", host);
                 return 0;
             }
         }
+        logger_log(LOG_DEBUG, "request %s ", host);
     }
 
     return 1;
@@ -164,5 +166,5 @@ dns_destroy() {
     free(black_list.domains);
     black_list.elements = 0;
 
-    logger_log(LOG_WARNING, "DNS filter stoped.");
+    logger_log(LOG_NOTICE, "DNS filter stoped.");
 }

@@ -34,6 +34,7 @@ public class ProfileManager {
         int id = settings.getInt(Constants.Key.profileId, -1);
         profile.setId(id);
         profile.setGlobal(settings.getBoolean(Constants.Key.isGlobalProxy, false));
+        profile.setProxyApps(settings.getBoolean(Constants.Key.isProxyApps, false));
         profile.setBypass(settings.getBoolean(Constants.Key.isBypassApps, false));
         profile.setName(settings.getString(Constants.Key.profileName, "Default"));
         profile.setLocalIP(settings.getString(Constants.Key.localIP, ""));
@@ -68,6 +69,7 @@ public class ProfileManager {
 
     private void setPreferences(Profile profile) {
         SharedPreferences.Editor edit = settings.edit();
+        edit.putBoolean(Constants.Key.isProxyApps, profile.isProxyApps());
         edit.putBoolean(Constants.Key.isBypassApps, profile.isBypass());
         edit.putString(Constants.Key.profileName, profile.getName());
         edit.putString(Constants.Key.localIP, profile.getLocalIP());

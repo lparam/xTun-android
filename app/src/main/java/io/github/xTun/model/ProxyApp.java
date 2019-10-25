@@ -1,16 +1,16 @@
 package io.github.xTun.model;
 
-public class ProxiedApp {
+public class ProxyApp {
     private int uid;
     private String name;
     private String packageName;
-    private boolean proxied;
+    private boolean proxy;
 
-    public ProxiedApp(int uid, String name, String packageName, boolean proxied) {
+    public ProxyApp(int uid, String name, String packageName, boolean proxied) {
         this.uid = uid;
         this.name = name;
         this.packageName = packageName;
-        this.proxied = proxied;
+        this.proxy = proxied;
     }
 
     public int getId() {
@@ -25,11 +25,11 @@ public class ProxiedApp {
         return packageName;
     }
 
-    public boolean getProxied() {
-        return proxied;
+    public boolean getProxy() {
+        return proxy;
     }
 
-    public void setProxied(boolean proxied) {
-        this.proxied = proxied;
+    public void setProxy(boolean proxy) {
+        this.proxy = proxy;
     }
 }

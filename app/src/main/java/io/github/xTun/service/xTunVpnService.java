@@ -1,5 +1,8 @@
 package io.github.xTun.service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -8,12 +11,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -30,7 +35,7 @@ import io.github.xTun.R;
 import io.github.xTun.aidl.Config;
 import io.github.xTun.aidl.IxTunService;
 import io.github.xTun.aidl.IxTunServiceCallback;
-import io.github.xTun.model.ProxiedApp;
+import io.github.xTun.model.ProxyApp;
 import io.github.xTun.ui.AppManagerActivity;
 import io.github.xTun.ui.MainActivity;
 import io.github.xTun.ui.xTunRunnerActivity;
@@ -53,18 +58,20 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     private Thread vpnThread;
     private Handler handler;
 
+    private Builder builder;
+
     private final int FAILED = 0;
     private final int CONNECTED = 1;
     private final int STOPPED = 2;
 
     private IxTunService.Stub binder = new IxTunService.Stub() {
         @Override
-        public int getState() throws RemoteException {
+        public int getState() {
             return state.ordinal();
         }
 
         @Override
-        public void registerCallback(IxTunServiceCallback cb) throws RemoteException {
+        public void registerCallback(IxTunServiceCallback cb) {
             if (cb != null) {
                 callbacks.register(cb);
                 callbackCount += 1;
@@ -72,7 +79,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         }
 
         @Override
-        public void unregisterCallback(IxTunServiceCallback cb) throws RemoteException {
+        public void unregisterCallback(IxTunServiceCallback cb) {
             if (cb != null ) {
                 callbacks.unregister(cb);
                 callbackCount -= 1;
@@ -93,35 +100,68 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         }
 
         @Override
-        public void stop() throws RemoteException {
+        public void stop() {
             if (state != Constants.State.CONNECTING && state != Constants.State.STOPPING) {
                 stopRunner();
             }
         }
     };
 
-    private void notifyForegroundAlert(String title, String info, Boolean visible) {
-        Intent openIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
-        Intent closeIntent = new Intent(Constants.Action.CLOSE);
-        PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setWhen(0)
-                .setTicker(title)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(info)
-                .setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_logo)
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel,
-                        getString(R.string.stop), actionIntent);
+    private void notifyForegroundAlert(String title, String info) {
 
-        if (visible) {
-            builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "service-vpn";
+            String channelName = getString(R.string.service_vpn);
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel channel = nm.getNotificationChannel(channelId);
+            if (channel == null) {
+                channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
+            }
+            nm.createNotificationChannel(channel);
+            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                intent.putExtra(Settings.EXTRA_CHANNEL_ID, channel.getId());
+                startActivity(intent);
+                Toast.makeText(this, getString(R.string.notify_tips), Toast.LENGTH_SHORT).show();
+
+            } else {
+                Notification nf = new Notification.Builder(this, channelId)
+                        .setContentText(info)
+                        .setSettingsText(getString(R.string.settings_tips))
+                        .setContentTitle(getString(R.string.app_name))
+                        .setSmallIcon(R.drawable.ic_logo)
+                        .build();
+
+                Intent notificationIntent = new Intent(getBaseContext(), MainActivity.class);
+                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
+                nf.fullScreenIntent = intent;
+
+                nf.flags |= Notification.FLAG_AUTO_CANCEL;
+                nm.notify(1, nf);
+                startForeground(1, nf);
+            }
+
         } else {
-            builder.setPriority(NotificationCompat.PRIORITY_MIN);
-        }
+            Intent openIntent = new Intent(this, MainActivity.class);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
+            Intent closeIntent = new Intent(Constants.Action.CLOSE);
+            PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            builder.setWhen(0)
+                    .setTicker(title)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(info)
+                    .setContentIntent(contentIntent)
+                    .setSmallIcon(R.drawable.ic_logo)
+                    .addAction(android.R.drawable.ic_menu_close_clear_cancel,
+                            getString(R.string.stop), actionIntent);
 
-        startForeground(1, builder.build());
+            builder.setPriority(NotificationCompat.PRIORITY_MIN);
+
+            startForeground(1, builder.build());
+        }
     }
 
     @Override
@@ -148,13 +188,11 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         stopRunner();
     }
 
-    private void route_foreign(Builder builder) {
+    private void route(Builder builder, int rid) {
         String line;
-        final BufferedReader reader =
-                new BufferedReader(new InputStreamReader(
-                        this.getResources().openRawResource(R.raw.route_foreign)));
 
-        try {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                this.getResources().openRawResource(rid)))) {
             while ((line = reader.readLine()) != null) {
                 final String[] route = line.split("/");
                 if (route.length == 2) {
@@ -165,14 +203,8 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         } catch (final Throwable t) {
             Log.e(TAG, "", t);
 
-        } finally {
-            try {
-                reader.close();
-
-            } catch (final IOException ioe) {
-                // ignore
-            }
         }
+        // ignore
     }
 
     private String createDomains() {
@@ -197,60 +229,53 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     }
 
     private void startVpn() {
-        String DNS = "8.8.8.8";
-        String DNS_ROUTE = "8.8.0.0";
+        String DNS = "1.1.1.1";
         String LOCAL_DNS = "114.114.114.114";
-        int DNS_ROUTE_CIDR = 16;
         int VPN_CIDR = 24;
-        boolean verbose = true;
+        boolean verbose = false;
 
-        Builder builder = new Builder();
+        builder = new Builder();
         builder.setSession(config.profileName);
         builder.setMtu(config.mtu);
         builder.addAddress(config.localIP, VPN_CIDR);
         builder.addDnsServer(DNS);
-        builder.addRoute(DNS_ROUTE, DNS_ROUTE_CIDR);
+        builder.addRoute("114.114.115.115", 32);
 
-        if (Utils.isLollipopOrAbove()) {
-            try {
-                if (!config.isGlobalProxy) {
-                    ProxiedApp[] apps = AppManagerActivity.getProxiedApps(this, config.proxiedAppString);
-                    for (ProxiedApp app : apps) {
-                        if (config.isBypassApps) {
-                            builder.addDisallowedApplication(app.getPackageName());
+        try {
+            if (config.isProxyApps) {
+                Log.i(TAG, "Per-App Proxy");
+                ProxyApp[] apps = AppManagerActivity.getProxiedApps(this, config.proxiedAppString);
+                for (ProxyApp app : apps) {
+                    if (config.isBypassApps) {
+                        builder.addDisallowedApplication(app.getPackageName());
 
-                        } else {
-                            builder.addAllowedApplication(app.getPackageName());
-                        }
+                    } else {
+                        builder.addAllowedApplication(app.getPackageName());
                     }
                 }
-
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Package name not found");
             }
+
+        } catch (PackageManager.NameNotFoundException ex) {
+            Log.e(TAG, ex.getMessage());
         }
 
-        boolean global = false;
-
-        if (config.route.equals(Constants.Route.ALL)) {
-            global = true;
-            builder.addRoute("0.0.0.0", 0);
-
-        } else {
-            route_foreign(builder);
+        boolean global = !config.isProxyApps;
+        if (global) {
+            Log.i(TAG, "Global Proxy");
         }
+
+        builder.addRoute("0.0.0.0", 0);
 
         vpnInterface = builder.establish();
 
         String ifconf = String.format(Locale.ENGLISH, "%s/%d", config.localIP, VPN_CIDR);
         int fd = vpnInterface.getFd();
         String domainPath = createDomains();
-        boolean ret = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
-                                  config.server, config.remotePort, config.password,
-                                  LOCAL_DNS, domainPath);
-        if (ret) {
+        boolean rc = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
+                                config.password, LOCAL_DNS, domainPath);
+        if (rc) {
             handler.sendEmptyMessage(CONNECTED);
-            xTun.start();
+            xTun.start(config.server, config.remotePort);
         } else {
             handler.sendEmptyMessage(FAILED);
         }
@@ -372,9 +397,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case CONNECTED:
-                notifyForegroundAlert(
-                        getString(R.string.forward_success),
-                        getString(R.string.service_running, config.profileName), false);
+                notifyForegroundAlert(getString(R.string.forward_success), getString(R.string.service_running, config.profileName));
                 changeState(Constants.State.CONNECTED);
                 break;
             case STOPPED:
@@ -397,5 +420,4 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         }
         return rc;
     }
-
 }

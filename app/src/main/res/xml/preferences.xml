@@ -73,36 +73,35 @@
             android:title="@string/protocol_list">
         </io.github.xTun.preferences.SummaryListPreference>
 
-        <io.github.xTun.preferences.SummaryListPreference
-                android:defaultValue="all"
-                android:key="route"
-                android:entries="@array/route_entry"
-                android:entryValues="@array/route_value"
-                android:summary="@string/route_list_summary"
-                android:title="@string/route_list">
-        </io.github.xTun.preferences.SummaryListPreference>
+        <!--<io.github.xTun.preferences.SummaryListPreference-->
+                <!--android:defaultValue="all"-->
+                <!--android:key="route"-->
+                <!--android:entries="@array/route_entry"-->
+                <!--android:entryValues="@array/route_value"-->
+                <!--android:summary="@string/route_list_summary"-->
+                <!--android:title="@string/route_list">-->
+        <!--</io.github.xTun.preferences.SummaryListPreference>-->
 
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="isGlobalProxy"
-            android:disableDependentsState="true"
-            android:summary="@string/auto_set_proxy_summary"
-            android:title="@string/auto_set_proxy">
-        </CheckBoxPreference>
+        <!--<CheckBoxPreference-->
+            <!--android:defaultValue="true"-->
+            <!--android:key="isGlobalProxy"-->
+            <!--android:disableDependentsState="true"-->
+            <!--android:summary="@string/auto_set_proxy_summary"-->
+            <!--android:title="@string/auto_set_proxy">-->
+        <!--</CheckBoxPreference>-->
 
-        <Preference
-            android:key="proxyedApps"
-            android:dependency="isGlobalProxy"
+        <SwitchPreference
+            android:key="proxyApps"
             android:summary="@string/proxied_apps_summary"
             android:title="@string/proxied_apps">
-            <intent android:action="io.github.xtun.ui.AppManagerActivity"/>
-        </Preference>
+            <!--<intent android:action="io.github.xTun.ui.AppManagerActivity"/>-->
+        </SwitchPreference>
 
-        <CheckBoxPreference
+        <SwitchPreference
                 android:key="isAutoConnect"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect">
-        </CheckBoxPreference>
+        </SwitchPreference>
 
     </PreferenceCategory>
 

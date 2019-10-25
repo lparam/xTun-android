@@ -41,7 +41,7 @@
     <string name="proxied_apps">Per-App Proxy</string>
     <string name="proxied_apps_summary">Set proxy for selected apps</string>
     <string name="proxied_help">Per-App Proxy</string>
-    <string name="bypass_apps">Bypass Mode</string>
+    <string name="bypass_apps">Bypass</string>
     <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
     <string name="auto_connect">Auto Connect</string>
     <string name="auto_connect_summary">Enable xTun on startup</string>
@@ -83,7 +83,11 @@
     <string name="add_profile">Add Profile</string>
     <string name="version_default">Version 1.0.0 (100)</string>
     <string name="title_activity_app_manager">AppManagerActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="service_vpn">VPN Service</string>
+    <string name="notify_tips">Please open the notification</string>
+    <string name="settings_tips">VPN Settings</string>
+    <string name="proxied_apps_mode">Mode</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
 
 </resources>

@@ -10,8 +10,6 @@ public class Constants {
 
     public class Route {
         public static final String ALL = "all";
-        public static final String BYPASS_LAN = "bypass-lan";
-        public static final String BYPASS_CHN = "bypass-china";
     }
 
     public enum State {
@@ -43,15 +41,15 @@ public class Constants {
         public static final String proxied = "Proxyed";
 
         public static final String status = "status";
-        public static final String proxyedApps = "proxyedApps";
+        public static final String proxyApps = "proxyApps";
         public static final String route = "route";
         public static final String protocol = "protocol";
 
         public static final String isAutoConnect = "isAutoConnect";
 
         public static final String isGlobalProxy = "isGlobalProxy";
+        public static final String isProxyApps = "isProxyApps";
         public static final String isBypassApps = "isBypassApps";
-        public static final String isUdpDns = "isUdpDns";
 
         public static final String localIP = "localIP";
         public static final String server = "server";

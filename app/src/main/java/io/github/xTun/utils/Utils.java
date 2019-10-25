@@ -35,10 +35,6 @@ import io.github.xTun.BuildConfig;
 public class Utils {
     private static String TAG = "xTun";
 
-    public static boolean isLollipopOrAbove() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
-
     public static String readFromFile(String name) {
         File file = new File(Constants.Path.BASE, name);
         StringBuilder text = new StringBuilder();

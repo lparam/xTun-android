@@ -1,13 +1,16 @@
 package io.github.xTun.ui;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.preference.SwitchPreference;
 
 import io.github.xTun.preferences.SummaryEditTextPreference;
-import io.github.xTun.utils.Utils;
 import io.github.xTun.R;
 import io.github.xTun.model.Profile;
 import io.github.xTun.preferences.PasswordEditTextPreference;
@@ -15,6 +18,11 @@ import io.github.xTun.preferences.ProfileEditTextPreference;
 import io.github.xTun.utils.Constants;
 
 public class PrefsFragment extends PreferenceFragment {
+    /**
+     *
+     */
+    private SwitchPreference isProxyApps;
+
     public static String[] CLIENT_PREFS = {
             Constants.Key.localIP,
             Constants.Key.mtu,
@@ -31,8 +39,7 @@ public class PrefsFragment extends PreferenceFragment {
             Constants.Key.protocol,
             Constants.Key.route,
             Constants.Key.isGlobalProxy,
-            Constants.Key.proxyedApps,
-            Constants.Key.isUdpDns,
+            Constants.Key.proxyApps,
             Constants.Key.isAutoConnect
     };
 
@@ -41,6 +48,21 @@ public class PrefsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
+
+        isProxyApps = (SwitchPreference) findPreference(Constants.Key.proxyApps);
+        isProxyApps.setOnPreferenceClickListener(preference -> {
+            Intent intent = new Intent(preference.getContext(), AppManagerActivity.class);
+            startActivity(intent);
+            isProxyApps.setChecked(true);
+            return true;
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        isProxyApps.setChecked(prefs.getBoolean(Constants.Key.isProxyApps, false));
     }
 
     public void setPreferenceEnabled(boolean enabled) {
@@ -59,8 +81,8 @@ public class PrefsFragment extends PreferenceFragment {
         for (String name : FEATURE_PREFS) {
             Preference pref = findPreference(name);
             if (pref != null) {
-                if (name.equals(Constants.Key.isGlobalProxy) || name.equals(Constants.Key.proxyedApps)) {
-                    pref.setEnabled(enabled && (Utils.isLollipopOrAbove()));
+                if (name.equals(Constants.Key.isGlobalProxy) || name.equals(Constants.Key.proxyApps)) {
+                    pref.setEnabled(enabled);
 
                 } else {
                     pref.setEnabled(enabled);

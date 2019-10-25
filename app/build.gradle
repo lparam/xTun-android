@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 
 if(file('../sign.gradle').exists()) {
     apply from: '../sign.gradle'
@@ -8,18 +7,25 @@ if(file('../sign.gradle').exists()) {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "io.github.xTun"
-        minSdkVersion 18
-        targetSdkVersion 23
-        versionCode 110
-        versionName '1.1.0'
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 120
+        versionName '1.2.0'
+
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters 'armeabi-v7a', 'x86' //, 'arm64-v8a', 'x86_64'
+                arguments "-j${Runtime.runtime.availableProcessors()}"
+            }
+        }
     }
     lintOptions {
-        abortOnError true
         disable 'MissingTranslation'
+        abortOnError true
     }
     buildTypes {
         release {
@@ -34,17 +40,25 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         applicationVariants.all { variant ->
-            variant.outputs.each { output ->
-                appendVersionNameVersionCode(variant, output, defaultConfig)
+            variant.outputs.all { output ->
+                // variant.packageApplicationProvider.get().outputDirectory = new File(project.rootDir.absolutePath + "/apk")
+                def fileName
+                if (output.name == 'debug') {
+                    fileName = "xTun-v${defaultConfig.versionName}-debug.apk"
+                } else {
+                    fileName = "xTun-v${defaultConfig.versionName}.apk"
+                }
+                output.outputFileName = fileName
             }
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/rxjava.properties'
     }
     productFlavors {
     }
@@ -55,28 +69,23 @@ android {
     }
 }
 
-def appendVersionNameVersionCode(variant, output, defaultConfig) {
-    def versionName = defaultConfig.versionName
-    if(variant.buildType.name == android.buildTypes.debug.name) {
-        versionName += "-beta"
-    }
-    def file = output.outputFile
-    output.outputFile = new File(file.parent, "xTun.apk".replace(".apk", "-v" + versionName + ".apk"))
-}
-
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:design:23.2.1'
-    compile 'com.android.support:support-annotations:23.2.1'
-    compile 'io.reactivex:rxjava:1.1.2'
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava-async-util:0.21.0'
-    compile 'com.trello:rxlifecycle:0.5.0'
-    compile 'com.trello:rxlifecycle-components:0.5.0'
-    compile('com.mikepenz.materialdrawer:library:2.9.8@aar') {
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    api 'com.android.support:design:28.0.0'
+    api 'com.android.support:support-annotations:28.0.0'
+    api "com.android.support:appcompat-v7:28.0.0"
+    api 'com.android.support.constraint:constraint-layout:1.1.3'
+    api 'io.reactivex.rxjava2:rxjava:2.2.7'
+    api 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    api 'com.github.akarnokd:rxjava2-extensions:0.20.8'
+    api 'com.trello.rxlifecycle2:rxlifecycle:2.2.2'
+    api 'com.trello.rxlifecycle2:rxlifecycle-components:2.2.2'
+    api('com.mikepenz:materialdrawer:5.8.0@aar') {
         transitive = true
     }
-    compile 'dnsjava:dnsjava:2.1.7'
-    compile 'com.google.code.gson:gson:2.6.2'
-    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    api "com.mikepenz:iconics-core:2.8.1@aar"
+    api 'com.mikepenz:google-material-typeface:3.0.1.2.original@aar'
+    api 'dnsjava:dnsjava:2.1.9'
+    api 'com.google.code.gson:gson:2.8.5'
+    api 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }
