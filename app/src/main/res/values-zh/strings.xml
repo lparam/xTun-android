@@ -36,7 +36,7 @@
   <string name="proxied_apps">分应用代理</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理</string>
   <string name="proxied_help">分应用代理</string>
-  <string name="bypass_apps">绕行模式</string>
+  <string name="bypass_apps">绕行</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自动连接</string>
   <string name="auto_connect_summary">随系统启动后台服务</string>
@@ -77,5 +77,11 @@
     <item>绕过局域网地址</item>
     <item>绕过局域网及中国大陆地址</item>
   </string-array>
+  <string name="service_vpn">VPN 服务</string>
+  <string name="notify_tips">请手动将通知打开</string>
+    <string name="settings_tips">VPN 设置</string>
+    <string name="proxied_apps_mode">模式</string>
+  <string name="on">启用</string>
+  <string name="off">关闭</string>
 
 </resources>

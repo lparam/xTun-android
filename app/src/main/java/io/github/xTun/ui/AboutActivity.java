@@ -16,6 +16,8 @@ import android.widget.TextView;
 import io.github.xTun.R;
 import io.github.xTun.utils.MovementCheck;
 
+import static android.text.Html.*;
+
 public class AboutActivity extends AppCompatActivity {
 
     @Override
@@ -49,7 +51,7 @@ public class AboutActivity extends AppCompatActivity {
         }
 
         TextView aboutDescription = (TextView) findViewById(R.id.aboutDescription);
-        aboutDescription.setText(Html.fromHtml(getString(R.string.about_description_text)));
+        aboutDescription.setText(fromHtml(getString(R.string.about_description_text)));
         aboutDescription.setMovementMethod(MovementCheck.getInstance());
     }
 

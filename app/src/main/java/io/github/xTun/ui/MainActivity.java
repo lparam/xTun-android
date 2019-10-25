@@ -25,9 +25,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -44,7 +41,6 @@ import java.util.List;
 import java.util.Locale;
 
 import hu.akarnokd.rxjava2.async.AsyncFlowable;
-import io.github.xTun.BuildConfig;
 import io.github.xTun.R;
 import io.github.xTun.aidl.IxTunService;
 import io.github.xTun.aidl.IxTunServiceCallback;
@@ -159,13 +155,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             currentProfile = profileManager.firstCreate();
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setLogo(R.drawable.ic_logo);
 
-        switchButton = (Switch) toolbar.findViewById(R.id.switchButton);
+        switchButton = toolbar.findViewById(R.id.switchButton);
         switchButton.setOnCheckedChangeListener(this);
 
-        TextView title  = (TextView) toolbar.findViewById(R.id.title);
+        TextView title  = toolbar.findViewById(R.id.title);
         Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Iceland.ttf");
         if (tf != null) title.setTypeface(tf);
 

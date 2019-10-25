@@ -27,6 +27,8 @@ public class Profile {
     private boolean global = true;
     @SerializedName("route_bypass")
     private boolean bypass = false;
+    @SerializedName("proxy_apps")
+    private boolean proxyApps = false;
     private String individual = "";
 
     public void setId(int id) {
@@ -68,6 +70,8 @@ public class Profile {
     public void setGlobal(boolean global) {
         this.global = global;
     }
+
+    public void setProxyApps(boolean proxyApps) { this.proxyApps = proxyApps; }
 
     public void setBypass(boolean bypass) {
         this.bypass = bypass;
@@ -113,17 +117,13 @@ public class Profile {
         return global;
     }
 
-    public boolean isBypass() {
-        return bypass;
-    }
+    public boolean isProxyApps() { return bypass; }
+
+    public boolean isBypass() { return bypass; }
 
     public void setIndividual(String individual) {
         this.individual = individual;
     }
 
-    public String getIndividual() {
-
-        return individual;
-    }
-
+    public String getIndividual() { return individual; }
 }

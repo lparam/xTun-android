@@ -20,18 +20,20 @@ out/
 gen/
 lib/
 obj/
+apk/
 
 # Local configuration file (sdk path, etc)
+*.iml
 .idea
 .navigation
 .gradle
+.vscode
 local.properties
 ant.properties
 project.properties
+proguard-project.txt
 build.xml
 build/
-*.iml
-proguard-project.txt
 
 /libs
 /app/src/main/assets/x86/*

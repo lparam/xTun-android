@@ -1,9 +1,11 @@
 package io.github.xTun.ui;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -24,6 +26,8 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -46,7 +50,7 @@ import java.util.Locale;
 
 import hu.akarnokd.rxjava2.async.AsyncFlowable;
 import io.github.xTun.R;
-import io.github.xTun.model.ProxiedApp;
+import io.github.xTun.model.ProxyApp;
 import io.github.xTun.utils.Constants;
 import io.github.xTun.utils.Utils;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -61,7 +65,7 @@ public class AppManagerActivity extends RxAppCompatActivity
     private ListView appListView;
     private ProgressDialog progressDialog;
     private int STUB = android.R.drawable.sym_def_app_icon;
-    private ProxiedApp[] apps;
+    private ProxyApp[] apps;
 
     private class AppIconDownloader extends BaseImageDownloader {
 
@@ -114,7 +118,7 @@ public class AppManagerActivity extends RxAppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_manager);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
@@ -135,16 +139,31 @@ public class AppManagerActivity extends RxAppCompatActivity
                         .imageDownloader(new AppIconDownloader(this))
                         .build();
         ImageLoader.getInstance().init(config);
+        
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putBoolean(Constants.Key.isProxyApps, true);
+        edit.apply();
 
-        Switch bypassSwitch = (Switch) findViewById(R.id.bypassSwitch);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        RadioGroup bypassGroup = findViewById(R.id.bypassGroup);
+        bypassGroup.check(prefs.getBoolean(Constants.Key.isBypassApps, false) ? R.id.btn_bypass : R.id.btn_on);
+        bypassGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId) {
+                case R.id.btn_off:
+                    edit.putBoolean(Constants.Key.isProxyApps, false);
+                    finish();
+                    break;
+                case R.id.btn_on:
+                    edit.putBoolean(Constants.Key.isBypassApps, false);
+                    break;
+                case R.id.btn_bypass:
+                    edit.putBoolean(Constants.Key.isBypassApps, true);
+                    break;
+            }
+            edit.apply();
+        });
 
-        bypassSwitch.setOnCheckedChangeListener((button, checked) ->
-                prefs.edit().putBoolean(Constants.Key.isBypassApps, checked).commit());
-
-        bypassSwitch.setChecked(prefs.getBoolean(Constants.Key.isBypassApps, false));
-
-        appListView = (ListView) findViewById(R.id.applistview);
+        appListView = findViewById(R.id.applistview);
     }
 
     @Override
@@ -155,30 +174,38 @@ public class AppManagerActivity extends RxAppCompatActivity
         }
     }
 
-    private ProxiedApp[] getApps(Context context) {
+    private ProxyApp[] getApps(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String proxiedAppString = prefs.getString(Constants.Key.proxied, "");
-        String[] appString = proxiedAppString.split("\\|");
+        String[] appString = new String[0];
+        if (proxiedAppString != null) {
+            appString = proxiedAppString.split("\\|");
+        }
         Arrays.sort(appString);
 
-        PackageManager packageManager = context.getPackageManager();
-        List<ApplicationInfo> infoList = packageManager.getInstalledApplications(0);
-        ArrayList<ProxiedApp> appList = new ArrayList<>();
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> infoList = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
+        ArrayList<ProxyApp> appList = new ArrayList<>();
 
-        for (ApplicationInfo a : infoList) {
-            CharSequence label = packageManager.getApplicationLabel(a);
-            //Drawable icon = packageManager.getApplicationIcon(a);
-            if ((a.uid >= 10000) && label != null) {
-                String name = label.toString();
-                String userName = Integer.toString(a.uid);
-                int index = Arrays.binarySearch(appString, userName);
-                boolean proxied = index >= 0;
-                // trim no-break space
-                ProxiedApp app = new ProxiedApp(a.uid, name.replace("\u00A0",""), a.packageName, proxied);
-                appList.add(app);
+        for (PackageInfo p : infoList) {
+            String  label = p.applicationInfo.loadLabel(pm).toString();
+            int uid = p.applicationInfo.uid;
+            if (p.requestedPermissions == null) {
+                continue;
+            }
+            for (String perm : p.requestedPermissions) {
+                if (perm.contains(Manifest.permission.INTERNET)) {
+                    String userName = Integer.toString(uid);
+                    int index = Arrays.binarySearch(appString, userName);
+                    boolean proxied = index >= 0;
+                    // trim no-break space
+                    ProxyApp app = new ProxyApp(uid, label.replace("\u00A0",""), p.packageName, proxied);
+                    appList.add(app);
+                    break;
+                }
             }
         }
-        ProxiedApp[] appArray = new ProxiedApp[appList.size()];
+        ProxyApp[] appArray = new ProxyApp[appList.size()];
         appList.toArray(appArray);
 
         Collator c = Collator.getInstance(Locale.CHINESE);
@@ -186,13 +213,13 @@ public class AppManagerActivity extends RxAppCompatActivity
             CollationKey k1 = c.getCollationKey(a.getName());
             CollationKey k2 = c.getCollationKey(b.getName());
 
-            if (a.getProxied()) {
-                if (b.getProxied()) {
+            if (a.getProxy()) {
+                if (b.getProxy()) {
                     return k1.compareTo(k2);
                 }
                 return -1;
 
-            } else if (a.getProxied() == b.getProxied()) {
+            } else if (a.getProxy() == b.getProxy()) {
                 return k1.compareTo(k2);
 
             } else {
@@ -214,7 +241,7 @@ public class AppManagerActivity extends RxAppCompatActivity
                 .compose(bindToLifecycle())
                 .subscribe(apps -> {
                     this.apps = apps;
-                    adapter = new ArrayAdapter<ProxiedApp>(this, R.layout.apps_item, R.id.itemtext, apps) {
+                    adapter = new ArrayAdapter<ProxyApp>(this, R.layout.apps_item, R.id.itemtext, apps) {
                         @NonNull
                         @Override
                         public View getView(int position, View view, @NonNull ViewGroup parent) {
@@ -222,9 +249,9 @@ public class AppManagerActivity extends RxAppCompatActivity
                             ListEntry entry;
                             if (convertView == null) {
                                 convertView = getLayoutInflater().inflate(R.layout.apps_item, parent, false);
-                                TextView text = (TextView) convertView.findViewById(R.id.itemtext);
-                                CheckBox box = (CheckBox) convertView.findViewById(R.id.itemcheck);
-                                ImageView icon = (ImageView) convertView.findViewById(R.id.itemicon);
+                                TextView text = convertView.findViewById(R.id.itemtext);
+                                CheckBox box = convertView.findViewById(R.id.itemcheck);
+                                ImageView icon = convertView.findViewById(R.id.itemicon);
                                 entry = new ListEntry(box, text, icon);
                                 entry.getText().setOnClickListener(AppManagerActivity.this);
                                 entry.getBox().setOnCheckedChangeListener(AppManagerActivity.this);
@@ -234,7 +261,7 @@ public class AppManagerActivity extends RxAppCompatActivity
                                 entry = (ListEntry) convertView.getTag();
                             }
 
-                            ProxiedApp app = apps[position];
+                            ProxyApp app = apps[position];
                             DisplayImageOptions options =
                                     new DisplayImageOptions.Builder()
                                             .showImageOnLoading(STUB)
@@ -250,7 +277,7 @@ public class AppManagerActivity extends RxAppCompatActivity
                             entry.text.setText(app.getName());
                             CheckBox box = entry.getBox();
                             box.setTag(app);
-                            box.setChecked(app.getProxied());
+                            box.setChecked(app.getProxy());
                             entry.text.setTag(box);
 
                             return convertView;
@@ -276,9 +303,9 @@ public class AppManagerActivity extends RxAppCompatActivity
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        ProxiedApp app = (ProxiedApp) buttonView.getTag();
+        ProxyApp app = (ProxyApp) buttonView.getTag();
         if (app != null) {
-            app.setProxied(isChecked);
+            app.setProxy(isChecked);
         }
         saveAppSettings(this);
     }
@@ -286,10 +313,10 @@ public class AppManagerActivity extends RxAppCompatActivity
     @Override
     public void onClick(View v) {
         CheckBox box = (CheckBox) v.getTag();
-        ProxiedApp app = (ProxiedApp) box.getTag();
+        ProxyApp app = (ProxyApp) box.getTag();
         if (app != null) {
-            app.setProxied(!app.getProxied());
-            box.setChecked(app.getProxied());
+            app.setProxy(!app.getProxy());
+            box.setChecked(app.getProxy());
         }
         saveAppSettings(this);
     }
@@ -298,9 +325,9 @@ public class AppManagerActivity extends RxAppCompatActivity
         if (apps == null) return;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         StringBuilder proxiedApps = new StringBuilder();
-        for (ProxiedApp app : apps) {
-            if (app.getProxied()) {
-                proxiedApps.append(Integer.toString(app.getId()));
+        for (ProxyApp app : apps) {
+            if (app.getProxy()) {
+                proxiedApps.append(app.getId());
                 proxiedApps.append("|");
             }
         }
@@ -309,28 +336,34 @@ public class AppManagerActivity extends RxAppCompatActivity
         edit.apply();
     }
 
-    public static ProxiedApp[] getProxiedApps(Context context, String proxiedAppString) {
-        String[] proxiedApps = proxiedAppString.split("\\|");
-        Arrays.sort(proxiedApps);
+    public static ProxyApp[] getProxiedApps(Context context, String proxiedAppString) {
+        String[] proxyApps = proxiedAppString.split("\\|");
+        Arrays.sort(proxyApps);
 
-        PackageManager packageManager = context.getPackageManager();
-        List<ApplicationInfo> infoList = packageManager.getInstalledApplications(0);
-        ArrayList<ProxiedApp> appList = new ArrayList<>();
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> infoList = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
+        ArrayList<ProxyApp> appList = new ArrayList<>();
 
-        for (ApplicationInfo a : infoList) {
-            if (a.uid >= 10000) {
-                int uid = a.uid;
-                String name = packageManager.getApplicationLabel(a).toString();
-                String packageName = a.packageName;
-                int index = Arrays.binarySearch(proxiedApps, Integer.toString(uid));
-                boolean proxied = index >= 0;
-                if (proxied) {
-                    ProxiedApp app = new ProxiedApp(uid, name, packageName, true);
-                    appList.add(app);
+        for (PackageInfo p : infoList) {
+            String  label = p.applicationInfo.loadLabel(pm).toString();
+            int uid = p.applicationInfo.uid;
+            if (p.requestedPermissions == null) {
+                continue;
+            }
+            for (String perm : p.requestedPermissions) {
+                if (perm.contains(Manifest.permission.INTERNET)) {
+                    String name = label.toString();
+                    int index = Arrays.binarySearch(proxyApps, Integer.toString(uid));
+                    boolean proxied = index >= 0;
+                    if (proxied) {
+                        ProxyApp app = new ProxyApp(uid, name, p.packageName, true);
+                        appList.add(app);
+                    }
+                    break;
                 }
             }
         }
-        ProxiedApp[] appArray = new ProxiedApp[appList.size()];
+        ProxyApp[] appArray = new ProxyApp[appList.size()];
         appList.toArray(appArray);
         return appArray;
     }

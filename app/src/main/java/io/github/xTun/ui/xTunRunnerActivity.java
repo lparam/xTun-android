@@ -17,6 +17,8 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.util.Objects;
+
 import io.github.xTun.utils.ConfigUtils;
 import io.github.xTun.aidl.IxTunService;
 import io.github.xTun.service.xTunVpnService;
@@ -81,7 +83,7 @@ public class xTunRunnerActivity extends Activity {
             receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction().equalsIgnoreCase(Intent.ACTION_USER_PRESENT)) {
+                    if (Objects.requireNonNull(intent.getAction()).equalsIgnoreCase(Intent.ACTION_USER_PRESENT)) {
                         attachService();
                     }
                 }
