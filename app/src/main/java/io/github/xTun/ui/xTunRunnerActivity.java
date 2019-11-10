@@ -66,7 +66,7 @@ public class xTunRunnerActivity extends Activity {
         }
     }
 
-    private void deattachService() {
+    private void detachService() {
         if (bgService != null) {
             unbindService(connection);
             bgService = null;
@@ -97,7 +97,7 @@ public class xTunRunnerActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        deattachService();
+        detachService();
         if (receiver != null) {
             unregisterReceiver(receiver);
             receiver = null;
