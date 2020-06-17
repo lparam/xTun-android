@@ -20,6 +20,7 @@ public class Config implements Parcelable {
 
     public int remotePort = Constants.DefaultPort;
     public int mtu = Constants.DefaultMTU;
+    public String dns = Constants.DefaultDNS;
     public int protocol = Constants.UDP;
 
     public static final Parcelable.Creator<Config> CREATOR = new Parcelable.Creator<Config>() {
@@ -34,7 +35,7 @@ public class Config implements Parcelable {
 
     public Config(boolean isGlobalProxy, boolean isProxyApps, boolean isBypassApps,
                   String profileName, String localIP, String server, String password,
-                  String proxiedAppString, String route, int remotePort, int mtu, int protocol) {
+                  String proxiedAppString, String route, String dns, int remotePort, int mtu, int protocol) {
         this.isGlobalProxy = isGlobalProxy;
         this.isProxyApps = isProxyApps;
         this.isBypassApps = isBypassApps;
@@ -46,6 +47,7 @@ public class Config implements Parcelable {
         this.route = route;
         this.remotePort = remotePort;
         this.mtu = mtu;
+        this.dns = dns;
         this.protocol = protocol;
     }
 
@@ -65,6 +67,7 @@ public class Config implements Parcelable {
         route = in.readString();
         remotePort = in.readInt();
         mtu = in.readInt();
+        dns = in.readString();
         protocol = in.readInt();
     }
 
@@ -86,6 +89,7 @@ public class Config implements Parcelable {
         out.writeString(route);
         out.writeInt(remotePort);
         out.writeInt(mtu);
+        out.writeString(dns);
         out.writeInt(protocol);
     }
 }

@@ -32,11 +32,12 @@ public class PrefsFragment extends PreferenceFragment {
             Constants.Key.profileName,
             Constants.Key.server,
             Constants.Key.remotePort,
-            Constants.Key.password
+            Constants.Key.protocol,
+            Constants.Key.password,
+            Constants.Key.dns,
     };
 
     public static String[] FEATURE_PREFS = {
-            Constants.Key.protocol,
             Constants.Key.route,
             Constants.Key.isGlobalProxy,
             Constants.Key.proxyApps,
@@ -143,6 +144,7 @@ public class PrefsFragment extends PreferenceFragment {
             case Constants.Key.remotePort: updateSummaryEditTextPreference(pref, Integer.toString(profile.getRemotePort())); break;
             case Constants.Key.mtu: updateSummaryEditTextPreference(pref, Integer.toString(profile.getMTU())); break;
             case Constants.Key.password: updatePasswordEditTextPreference(pref, profile.getPassword()); break;
+            case Constants.Key.dns: updateSummaryEditTextPreference(pref, profile.getDNS()); break;
             case Constants.Key.protocol: updateListPreference(pref, Integer.toString(profile.getProtocol())); break;
             case Constants.Key.route: updateListPreference(pref, profile.getRoute()); break;
             case Constants.Key.isGlobalProxy: updateCheckBoxPreference(pref, profile.isGlobal()); break;

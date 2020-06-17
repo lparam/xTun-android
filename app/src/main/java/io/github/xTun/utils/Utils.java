@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -55,12 +54,16 @@ public class Utils {
 
     public static String resolve(String host, int addrType) {
         try {
+            Log.i(TAG, "resolve " + host + " with type " + addrType);
             Lookup lookup = new Lookup(host, addrType);
             SimpleResolver resolver = new SimpleResolver("114.114.114.114");
             resolver.setTimeout(5);
             lookup.setResolver(resolver);
             Record[] result = lookup.run();
-            if (result == null) return null;
+            if (result == null) {
+                Log.i(TAG, "resolve " + host + " return empty result" );
+                return null;
+            }
 
             List<Record> records = java.util.Arrays.asList(result);
             java.util.Collections.shuffle(records);
@@ -73,6 +76,7 @@ public class Utils {
             }
 
         } catch (Exception ex) {
+            Log.i(TAG, "resolve " + host + " failed: " + ex);
             return null;
         }
 
@@ -84,6 +88,7 @@ public class Utils {
             InetAddress addr = InetAddress.getByName(host);
             return addr.getHostAddress();
         } catch (Exception e) {
+            Log.i(TAG, "resolve " + host + " failed: " + e);
             return null;
         }
     }

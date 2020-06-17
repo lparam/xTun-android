@@ -229,16 +229,17 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     }
 
     private void startVpn() {
-        String DNS = "1.1.1.1";
         String LOCAL_DNS = "114.114.114.114";
         int VPN_CIDR = 24;
         boolean verbose = false;
+
+        Log.i(TAG, "DNS Server: " + config.dns);
 
         builder = new Builder();
         builder.setSession(config.profileName);
         builder.setMtu(config.mtu);
         builder.addAddress(config.localIP, VPN_CIDR);
-        builder.addDnsServer(DNS);
+        builder.addDnsServer(config.dns);
         builder.addRoute("114.114.115.115", 32);
 
         try {
@@ -308,26 +309,8 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         changeState(Constants.State.CONNECTING);
 
         if (config != null) {
-            boolean resolved = false;
-            if (!Utils.isIPv4Address(config.server) && !Utils.isIPv6Address(config.server)) {
-                String addr = Utils.resolve(config.server, true);
-                if (addr != null) {
-                    config.server = addr;
-                    resolved = true;
-                }
-
-            } else {
-                resolved = true;
-            }
-
-            if (resolved) {
-                vpnThread = new Thread(this, "xTun VpnService");
-                vpnThread.start();
-
-            } else {
-                changeState(Constants.State.STOPPED, getString(R.string.service_failed));
-                stopRunner();
-            }
+            vpnThread = new Thread(this, "xTun VpnService");
+            vpnThread.start();
         }
     }
 
@@ -410,7 +393,26 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
     @Override
     public void run() {
-        startVpn();
+        boolean resolved = false;
+        if (!Utils.isIPv4Address(config.server) && !Utils.isIPv6Address(config.server)) {
+            String host = config.server;
+            String addr = Utils.resolve(config.server, false);
+            if (addr != null) {
+                config.server = addr;
+                resolved = true;
+            }
+            Log.i(TAG, "resolved " + host + ": " + addr);
+
+        } else {
+            resolved = true;
+        }
+
+        if (resolved) {
+            startVpn();
+        } else {
+            changeState(Constants.State.STOPPED, getString(R.string.service_failed));
+            stopRunner();
+        }
     }
 
     public boolean protectSocket(int socket) {

@@ -19,12 +19,13 @@ public class ConfigUtils {
 
         int remotePort = Integer.parseInt(settings.getString(Constants.Key.remotePort, Integer.toString(Constants.DefaultPort)));
         int mtu = Integer.parseInt(settings.getString(Constants.Key.mtu, Integer.toString(Constants.DefaultMTU)));
+        String dns = settings.getString(Constants.Key.dns, Constants.DefaultDNS);
         int protocol = Integer.parseInt(settings.getString(Constants.Key.protocol, Integer.toString(Constants.UDP)), 16);
 
         String proxiedAppString = settings.getString(Constants.Key.proxied, "");
 
         return new Config(isGlobalProxy, isProxyApps, isBypassApps, profileName, localIP, server,
-                           password, proxiedAppString, route, remotePort, mtu, protocol);
+                           password, proxiedAppString, route, dns, remotePort, mtu, protocol);
     }
 
 }

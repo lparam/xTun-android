@@ -24,10 +24,8 @@
     <string name="profile_summary">Profile name</string>
     <string name="server">Server</string>
     <string name="server_summary">Hostname or IP of the remote server</string>
-    <string name="remote_port">Remote Port</string>
+    <string name="remote_port">Port</string>
     <string name="remote_port_summary">Port number of the remote server</string>
-    <string name="port">Local Port</string>
-    <string name="port_summary">Port number of the local server</string>
     <string name="password">Password</string>
     <string name="password_summary">Password of the remote server</string>
 
@@ -35,6 +33,8 @@
     <string name="feature_cat">Feature Settings</string>
     <string name="route_list">Route</string>
     <string name="route_list_summary">Bypass IP addresses in the route list</string>
+    <string name="dns">DNS</string>
+    <string name="dns_summary">DNS Server</string>
     <string name="protocol_list">Protocol</string>
     <string name="auto_set_proxy">Global Proxy</string>
     <string name="auto_set_proxy_summary">Set up system-wide proxy</string>

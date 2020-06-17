@@ -19,6 +19,8 @@ public class Profile {
     private int mtu = Constants.DefaultMTU;
     @SerializedName("password")
     private String password = "";
+    @SerializedName("dns")
+    private String dns = Constants.DefaultDNS;
     @SerializedName("protocol")
     private int protocol = Constants.UDP;
     @SerializedName("route")
@@ -103,6 +105,10 @@ public class Profile {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getDNS() {
+        return dns;
     }
 
     public int getProtocol() {
