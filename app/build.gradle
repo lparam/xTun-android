@@ -16,6 +16,10 @@ android {
         versionCode 120
         versionName '1.2.0'
 
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
+
         externalNativeBuild {
             ndkBuild {
                 abiFilters 'armeabi-v7a', 'x86' //, 'arm64-v8a', 'x86_64'
@@ -85,7 +89,7 @@ dependencies {
     }
     api "com.mikepenz:iconics-core:2.8.1@aar"
     api 'com.mikepenz:google-material-typeface:3.0.1.2.original@aar'
-    api 'dnsjava:dnsjava:2.1.9'
+    api 'dnsjava:dnsjava:3.1.0'
     api 'com.google.code.gson:gson:2.8.5'
     api 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 }
