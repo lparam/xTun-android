@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     @Override
     public void onDestroy() {
         super.onDestroy();
-        deattachService();
+        detachService();
         unregisterReceiver(preferenceReceiver);
         new BackupManager(this).dataChanged();
         if (handler != null) {
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
     }
 
-    private void deattachService() {
+    private void detachService() {
         if (vpnService != null) {
             try {
                 vpnService.unregisterCallback(callback);

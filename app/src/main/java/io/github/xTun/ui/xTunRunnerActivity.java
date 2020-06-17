@@ -106,22 +106,19 @@ public class xTunRunnerActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (resultCode) {
-            case Activity.RESULT_OK:
-                if (bgService != null) {
-                    if (settings == null) {
-                        settings = PreferenceManager.getDefaultSharedPreferences(this);
-                    }
-                    try {
-                        bgService.start(ConfigUtils.load(settings));
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to start VpnService");
-                    }
+        if (resultCode == Activity.RESULT_OK) {
+            if (bgService != null) {
+                if (settings == null) {
+                    settings = PreferenceManager.getDefaultSharedPreferences(this);
                 }
-                break;
-            default:
-                Log.e(TAG, "Failed to start VpnService");
-                break;
+                try {
+                    bgService.start(ConfigUtils.load(settings));
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to start VpnService");
+                }
+            }
+        } else {
+            Log.e(TAG, "Failed to start VpnService");
         }
         finish();
     }

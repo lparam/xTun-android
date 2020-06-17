@@ -10,13 +10,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.widget.TextView;
 
 import io.github.xTun.R;
 import io.github.xTun.utils.MovementCheck;
 
-import static android.text.Html.*;
+import static android.text.Html.fromHtml;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -25,7 +24,7 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setSubtitleTextColor(Color.WHITE);
@@ -41,7 +40,7 @@ public class AboutActivity extends AppCompatActivity {
             ab.setDisplayHomeAsUpEnabled(true);
         }
 
-        TextView aboutVersion = (TextView) findViewById(R.id.aboutVersion);
+        TextView aboutVersion = findViewById(R.id.aboutVersion);
         try {
             PackageInfo manager = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = getResources().getString(R.string.version, manager.versionName, manager.versionCode);
@@ -50,7 +49,7 @@ public class AboutActivity extends AppCompatActivity {
             aboutVersion.setText(R.string.version_default);
         }
 
-        TextView aboutDescription = (TextView) findViewById(R.id.aboutDescription);
+        TextView aboutDescription = findViewById(R.id.aboutDescription);
         aboutDescription.setText(fromHtml(getString(R.string.about_description_text)));
         aboutDescription.setMovementMethod(MovementCheck.getInstance());
     }
