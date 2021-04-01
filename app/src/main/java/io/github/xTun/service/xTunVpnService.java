@@ -1,8 +1,6 @@
 package io.github.xTun.service;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -18,7 +16,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -109,47 +106,31 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     };
 
     private void notifyForegroundAlert(String title, String info) {
+        String channelId = "service-vpn";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "service-vpn";
-            String channelName = getString(R.string.service_vpn);
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationChannel channel = nm.getNotificationChannel(channelId);
-            if (channel == null) {
-                channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
-            }
-            nm.createNotificationChannel(channel);
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                intent.putExtra(Settings.EXTRA_CHANNEL_ID, channel.getId());
-                startActivity(intent);
-                Toast.makeText(this, getString(R.string.notify_tips), Toast.LENGTH_SHORT).show();
+            Intent fullScreenIntent = new Intent(this, MainActivity.class);
+            fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
+                    fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            } else {
-                Notification nf = new Notification.Builder(this, channelId)
-                        .setContentText(info)
-                        .setSettingsText(getString(R.string.settings_tips))
-                        .setContentTitle(getString(R.string.app_name))
-                        .setSmallIcon(R.drawable.ic_logo)
-                        .build();
+            Notification nf = new NotificationCompat.Builder(this, channelId)
+                    .setContentText(info)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setSmallIcon(R.drawable.ic_logo)
+                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(fullScreenPendingIntent)
+                    .build();
 
-                Intent notificationIntent = new Intent(getBaseContext(), MainActivity.class);
-                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
-                nf.fullScreenIntent = intent;
-
-                nf.flags |= Notification.FLAG_AUTO_CANCEL;
-                nm.notify(1, nf);
-                startForeground(1, nf);
-            }
+            startForeground(1, nf);
 
         } else {
             Intent openIntent = new Intent(this, MainActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
             Intent closeIntent = new Intent(Constants.Action.CLOSE);
             PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
             builder.setWhen(0)
                     .setTicker(title)
                     .setContentTitle(getString(R.string.app_name))
