@@ -7,8 +7,8 @@ import io.github.xTun.utils.Constants;
 
 public class Config implements Parcelable {
 
-    public boolean isGlobalProxy = true;
-    public boolean isProxyApps = false;
+    public boolean isGlobalProxy = false;
+    public boolean isProxyApps = true;
     public boolean isBypassApps = false;
 
     public String profileName = Constants.DefaultProfileName;

@@ -8,7 +8,7 @@ public class ConfigUtils {
 
     public static Config load(SharedPreferences settings) {
         boolean isGlobalProxy = settings.getBoolean(Constants.Key.isGlobalProxy, false);
-        boolean isProxyApps = settings.getBoolean(Constants.Key.isProxyApps, false);
+        boolean isProxyApps = settings.getBoolean(Constants.Key.isProxyApps, true);
         boolean isBypassApps = settings.getBoolean(Constants.Key.isBypassApps, false);
 
         String profileName = settings.getString(Constants.Key.profileName, "Default");

@@ -61,6 +61,10 @@ public class Profile {
         this.password = password;
     }
 
+    public void setDNS(String dns) {
+        this.dns = dns;
+    }
+
     public void setProtocol(int protocol) {
         this.protocol = protocol;
     }
@@ -123,7 +127,7 @@ public class Profile {
         return global;
     }
 
-    public boolean isProxyApps() { return bypass; }
+    public boolean isProxyApps() { return proxyApps; }
 
     public boolean isBypass() { return bypass; }
 

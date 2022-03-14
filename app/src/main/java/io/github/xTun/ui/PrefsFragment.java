@@ -10,11 +10,11 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 
-import io.github.xTun.preferences.SummaryEditTextPreference;
 import io.github.xTun.R;
 import io.github.xTun.model.Profile;
 import io.github.xTun.preferences.PasswordEditTextPreference;
 import io.github.xTun.preferences.ProfileEditTextPreference;
+import io.github.xTun.preferences.SummaryEditTextPreference;
 import io.github.xTun.utils.Constants;
 
 public class PrefsFragment extends PreferenceFragment {
@@ -62,8 +62,8 @@ public class PrefsFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        isProxyApps.setChecked(prefs.getBoolean(Constants.Key.isProxyApps, false));
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        isProxyApps.setChecked(prefs.getBoolean(Constants.Key.isProxyApps, true));
     }
 
     public void setPreferenceEnabled(boolean enabled) {

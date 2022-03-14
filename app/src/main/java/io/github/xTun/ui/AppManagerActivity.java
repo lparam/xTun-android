@@ -12,10 +12,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +23,11 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -61,7 +62,7 @@ public class AppManagerActivity extends RxAppCompatActivity
     private ListAdapter adapter;
     private ListView appListView;
     private ProgressDialog progressDialog;
-    private int STUB = android.R.drawable.sym_def_app_icon;
+    private final int STUB = android.R.drawable.sym_def_app_icon;
     private ProxyApp[] apps;
 
     private class AppIconDownloader extends BaseImageDownloader {
@@ -86,10 +87,10 @@ public class AppManagerActivity extends RxAppCompatActivity
         }
     }
 
-    private class ListEntry {
-        private CheckBox box;
-        private TextView text;
-        private ImageView icon;
+    private static class ListEntry {
+        private final CheckBox box;
+        private final TextView text;
+        private final ImageView icon;
 
         ListEntry(CheckBox box, TextView text, ImageView icon) {
             this.box = box;
@@ -177,6 +178,7 @@ public class AppManagerActivity extends RxAppCompatActivity
         }
         Arrays.sort(appString);
 
+        // TODO: cached apps
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> infoList = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
         ArrayList<ProxyApp> appList = new ArrayList<>();
