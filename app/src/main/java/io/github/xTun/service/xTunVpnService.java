@@ -375,26 +375,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
     @Override
     public void run() {
-        boolean resolved = false;
-        if (!Utils.isIPv4Address(config.server) && !Utils.isIPv6Address(config.server)) {
-            String host = config.server;
-            String addr = Utils.resolve(config.server, false);
-            if (addr != null) {
-                config.server = addr;
-                resolved = true;
-            }
-            Log.i(TAG, "resolved " + host + ": " + addr);
-
-        } else {
-            resolved = true;
-        }
-
-        if (resolved) {
-            startVpn();
-        } else {
-            changeState(Constants.State.STOPPED, getString(R.string.service_failed));
-            stopRunner();
-        }
+        startVpn();
     }
 
     public boolean protectSocket(int socket) {
