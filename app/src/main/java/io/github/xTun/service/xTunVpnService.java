@@ -112,7 +112,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
             Intent fullScreenIntent = new Intent(this, MainActivity.class);
             fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
-                    fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    fullScreenIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification nf = new NotificationCompat.Builder(this, channelId)
                     .setContentText(info)
@@ -253,6 +253,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
         String ifconf = String.format(Locale.ENGLISH, "%s/%d", config.localIP, VPN_CIDR);
         int fd = vpnInterface.getFd();
+        Log.i(TAG, "Vpn fd: " + fd);
         String domainPath = createDomains();
         boolean rc = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
                                 config.password, LOCAL_DNS, domainPath);
