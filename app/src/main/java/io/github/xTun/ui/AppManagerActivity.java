@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,10 +12,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +21,13 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -64,7 +62,7 @@ public class AppManagerActivity extends RxAppCompatActivity
     private ListAdapter adapter;
     private ListView appListView;
     private ProgressDialog progressDialog;
-    private int STUB = android.R.drawable.sym_def_app_icon;
+    private final int STUB = android.R.drawable.sym_def_app_icon;
     private ProxyApp[] apps;
 
     private class AppIconDownloader extends BaseImageDownloader {
@@ -89,10 +87,10 @@ public class AppManagerActivity extends RxAppCompatActivity
         }
     }
 
-    private class ListEntry {
-        private CheckBox box;
-        private TextView text;
-        private ImageView icon;
+    private static class ListEntry {
+        private final CheckBox box;
+        private final TextView text;
+        private final ImageView icon;
 
         ListEntry(CheckBox box, TextView text, ImageView icon) {
             this.box = box;
@@ -108,9 +106,6 @@ public class AppManagerActivity extends RxAppCompatActivity
             return text;
         }
 
-        public ImageView getIcon() {
-            return icon;
-        }
     }
 
     @Override
@@ -183,6 +178,7 @@ public class AppManagerActivity extends RxAppCompatActivity
         }
         Arrays.sort(appString);
 
+        // TODO: cached apps
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> infoList = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
         ArrayList<ProxyApp> appList = new ArrayList<>();
@@ -352,11 +348,10 @@ public class AppManagerActivity extends RxAppCompatActivity
             }
             for (String perm : p.requestedPermissions) {
                 if (perm.contains(Manifest.permission.INTERNET)) {
-                    String name = label.toString();
                     int index = Arrays.binarySearch(proxyApps, Integer.toString(uid));
                     boolean proxied = index >= 0;
                     if (proxied) {
-                        ProxyApp app = new ProxyApp(uid, name, p.packageName, true);
+                        ProxyApp app = new ProxyApp(uid, label, p.packageName, true);
                         appList.add(app);
                     }
                     break;

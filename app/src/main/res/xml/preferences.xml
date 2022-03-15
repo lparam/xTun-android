@@ -51,6 +51,14 @@
                 android:singleLine="true">
         </io.github.xTun.preferences.SummaryEditTextPreference>
 
+        <io.github.xTun.preferences.SummaryListPreference
+            android:defaultValue="2"
+            android:key="protocol"
+            android:entries="@array/protocol_entry"
+            android:entryValues="@array/protocol_value"
+            android:title="@string/protocol_list">
+        </io.github.xTun.preferences.SummaryListPreference>
+
         <io.github.xTun.preferences.PasswordEditTextPreference
                 android:inputType="textPassword"
                 android:defaultValue=""
@@ -60,18 +68,18 @@
                 android:singleLine="true">
         </io.github.xTun.preferences.PasswordEditTextPreference>
 
+        <io.github.xTun.preferences.SummaryEditTextPreference
+            android:defaultValue="1.1.1.1"
+            android:key="dns"
+            android:summary="@string/server_summary"
+            android:title="@string/dns"
+            android:singleLine="true">
+        </io.github.xTun.preferences.SummaryEditTextPreference>
+
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/feature_cat">
-
-        <io.github.xTun.preferences.SummaryListPreference
-            android:defaultValue="2"
-            android:key="protocol"
-            android:entries="@array/protocol_entry"
-            android:entryValues="@array/protocol_value"
-            android:title="@string/protocol_list">
-        </io.github.xTun.preferences.SummaryListPreference>
 
         <!--<io.github.xTun.preferences.SummaryListPreference-->
                 <!--android:defaultValue="all"-->

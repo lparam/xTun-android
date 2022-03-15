@@ -26,7 +26,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE:= xTun
-LOCAL_SRC_FILES:= xTun.c local_ns_parser.c dns.c
+LOCAL_SRC_FILES:= xTun.c
 LOCAL_CFLAGS := -IxTun/src
 LOCAL_LDFLAGS += -fPIC
 LOCAL_LDLIBS += -llog

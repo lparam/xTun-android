@@ -34,13 +34,14 @@ public class ProfileManager {
         int id = settings.getInt(Constants.Key.profileId, -1);
         profile.setId(id);
         profile.setGlobal(settings.getBoolean(Constants.Key.isGlobalProxy, false));
-        profile.setProxyApps(settings.getBoolean(Constants.Key.isProxyApps, false));
+        profile.setProxyApps(settings.getBoolean(Constants.Key.isProxyApps, true));
         profile.setBypass(settings.getBoolean(Constants.Key.isBypassApps, false));
         profile.setName(settings.getString(Constants.Key.profileName, "Default"));
         profile.setLocalIP(settings.getString(Constants.Key.localIP, ""));
         profile.setHost(settings.getString(Constants.Key.server, ""));
         profile.setPassword(settings.getString(Constants.Key.password, ""));
         profile.setRoute(settings.getString(Constants.Key.route, "all"));
+        profile.setDNS(settings.getString(Constants.Key.dns, Constants.DefaultDNS));
 
         try {
             profile.setRemotePort(Integer.valueOf(settings.getString(Constants.Key.remotePort, Integer.toString(Constants.DefaultPort))));
@@ -77,6 +78,7 @@ public class ProfileManager {
         edit.putString(Constants.Key.password, profile.getPassword());
         edit.putString(Constants.Key.remotePort, Integer.toString(profile.getRemotePort()));
         edit.putString(Constants.Key.mtu, Integer.toString(profile.getMTU()));
+        edit.putString(Constants.Key.dns, profile.getDNS());
         edit.putString(Constants.Key.protocol, Integer.toString(profile.getProtocol()));
         edit.putString(Constants.Key.proxied, profile.getIndividual());
         edit.putInt(Constants.Key.profileId, profile.getId());

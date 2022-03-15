@@ -64,8 +64,7 @@ init(JNIEnv *env, jobject thiz,
     }*/
 
     tun = tun_alloc();
-    if (tun_config(tun, c_ifconf, fd, mtu, protocol, global, verbose, c_dns))
-    {
+    if (tun_config(tun, c_ifconf, fd, mtu, protocol, global, verbose, c_dns)) {
         tun_free(tun);
     } else {
         rc = JNI_TRUE;

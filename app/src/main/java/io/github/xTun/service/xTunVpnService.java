@@ -1,8 +1,6 @@
 package io.github.xTun.service;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -18,10 +16,10 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.app.NotificationCompat;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -108,47 +106,31 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     };
 
     private void notifyForegroundAlert(String title, String info) {
+        String channelId = "service-vpn";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "service-vpn";
-            String channelName = getString(R.string.service_vpn);
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationChannel channel = nm.getNotificationChannel(channelId);
-            if (channel == null) {
-                channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
-            }
-            nm.createNotificationChannel(channel);
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                intent.putExtra(Settings.EXTRA_CHANNEL_ID, channel.getId());
-                startActivity(intent);
-                Toast.makeText(this, getString(R.string.notify_tips), Toast.LENGTH_SHORT).show();
+            Intent fullScreenIntent = new Intent(this, MainActivity.class);
+            fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
+                    fullScreenIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-            } else {
-                Notification nf = new Notification.Builder(this, channelId)
-                        .setContentText(info)
-                        .setSettingsText(getString(R.string.settings_tips))
-                        .setContentTitle(getString(R.string.app_name))
-                        .setSmallIcon(R.drawable.ic_logo)
-                        .build();
+            Notification nf = new NotificationCompat.Builder(this, channelId)
+                    .setContentText(info)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setSmallIcon(R.drawable.ic_logo)
+                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(fullScreenPendingIntent)
+                    .build();
 
-                Intent notificationIntent = new Intent(getBaseContext(), MainActivity.class);
-                notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, notificationIntent, 0);
-                nf.fullScreenIntent = intent;
-
-                nf.flags |= Notification.FLAG_AUTO_CANCEL;
-                nm.notify(1, nf);
-                startForeground(1, nf);
-            }
+            startForeground(1, nf);
 
         } else {
             Intent openIntent = new Intent(this, MainActivity.class);
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
             Intent closeIntent = new Intent(Constants.Action.CLOSE);
             PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
             builder.setWhen(0)
                     .setTicker(title)
                     .setContentTitle(getString(R.string.app_name))
@@ -229,16 +211,17 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     }
 
     private void startVpn() {
-        String DNS = "1.1.1.1";
         String LOCAL_DNS = "114.114.114.114";
         int VPN_CIDR = 24;
         boolean verbose = false;
+
+        Log.i(TAG, "DNS Server: " + config.dns);
 
         builder = new Builder();
         builder.setSession(config.profileName);
         builder.setMtu(config.mtu);
         builder.addAddress(config.localIP, VPN_CIDR);
-        builder.addDnsServer(DNS);
+        builder.addDnsServer(config.dns);
         builder.addRoute("114.114.115.115", 32);
 
         try {
@@ -270,6 +253,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
         String ifconf = String.format(Locale.ENGLISH, "%s/%d", config.localIP, VPN_CIDR);
         int fd = vpnInterface.getFd();
+        Log.i(TAG, "Vpn fd: " + fd);
         String domainPath = createDomains();
         boolean rc = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
                                 config.password, LOCAL_DNS, domainPath);
@@ -308,26 +292,8 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         changeState(Constants.State.CONNECTING);
 
         if (config != null) {
-            boolean resolved = false;
-            if (!Utils.isIPv4Address(config.server) && !Utils.isIPv6Address(config.server)) {
-                String addr = Utils.resolve(config.server, true);
-                if (addr != null) {
-                    config.server = addr;
-                    resolved = true;
-                }
-
-            } else {
-                resolved = true;
-            }
-
-            if (resolved) {
-                vpnThread = new Thread(this, "xTun VpnService");
-                vpnThread.start();
-
-            } else {
-                changeState(Constants.State.STOPPED, getString(R.string.service_failed));
-                stopRunner();
-            }
+            vpnThread = new Thread(this, "xTun VpnService");
+            vpnThread.start();
         }
     }
 

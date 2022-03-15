@@ -7,6 +7,7 @@ public class Constants {
     public static final int UDP = 2;
     public static final String DefaultIP = "10.0.0.3";
     public static final String DefaultProfileName = "Untitled";
+    public static final String DefaultDNS = "1.1.1.1";
 
     public class Route {
         public static final String ALL = "all";
@@ -43,6 +44,7 @@ public class Constants {
         public static final String status = "status";
         public static final String proxyApps = "proxyApps";
         public static final String route = "route";
+        public static final String dns = "dns";
         public static final String protocol = "protocol";
 
         public static final String isAutoConnect = "isAutoConnect";

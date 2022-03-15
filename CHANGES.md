@@ -1,4 +1,11 @@
-v1.1.0 (2019-10-25)
+v1.3.0 (2022-3-15)
+-----------
+* Feature: arm64
+* Fix: close tcp stream
+* Change: adapt android 12
+
+
+v1.2.0 (2019-10-25)
 -----------
 * Change: upgrade SDK & NDK to latest
 * Change: don't resolve domain names locally

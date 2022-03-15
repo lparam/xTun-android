@@ -19,6 +19,8 @@ public class Profile {
     private int mtu = Constants.DefaultMTU;
     @SerializedName("password")
     private String password = "";
+    @SerializedName("dns")
+    private String dns = Constants.DefaultDNS;
     @SerializedName("protocol")
     private int protocol = Constants.UDP;
     @SerializedName("route")
@@ -57,6 +59,10 @@ public class Profile {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setDNS(String dns) {
+        this.dns = dns;
     }
 
     public void setProtocol(int protocol) {
@@ -105,6 +111,10 @@ public class Profile {
         return password;
     }
 
+    public String getDNS() {
+        return dns;
+    }
+
     public int getProtocol() {
         return protocol;
     }
@@ -117,7 +127,7 @@ public class Profile {
         return global;
     }
 
-    public boolean isProxyApps() { return bypass; }
+    public boolean isProxyApps() { return proxyApps; }
 
     public boolean isBypass() { return bypass; }
 
