@@ -21,11 +21,9 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Locale;
 
@@ -42,8 +40,7 @@ import io.github.xTun.utils.Utils;
 import io.github.xTun.xTun;
 
 public class xTunVpnService extends VpnService implements Handler.Callback, Runnable {
-
-    private String TAG = xTunVpnService.class.getSimpleName();
+    private final String TAG = xTunVpnService.class.getSimpleName();
 
     private Config config = null;
     private ParcelFileDescriptor vpnInterface;
@@ -56,13 +53,11 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     private Thread vpnThread;
     private Handler handler;
 
-    private Builder builder;
-
-    private final int FAILED = 0;
+    // private final int FAILED = 0;
     private final int CONNECTED = 1;
-    private final int STOPPED = 2;
+    // private final int STOPPED = 2;
 
-    private IxTunService.Stub binder = new IxTunService.Stub() {
+    private final IxTunService.Stub binder = new IxTunService.Stub() {
         @Override
         public int getState() {
             return state.ordinal();
@@ -127,9 +122,9 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
         } else {
             Intent openIntent = new Intent(this, MainActivity.class);
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE);
             Intent closeIntent = new Intent(Constants.Action.CLOSE);
-            PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
+            PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, PendingIntent.FLAG_IMMUTABLE);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
             builder.setWhen(0)
                     .setTicker(title)
@@ -170,25 +165,6 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         stopRunner();
     }
 
-    private void route(Builder builder, int rid) {
-        String line;
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                this.getResources().openRawResource(rid)))) {
-            while ((line = reader.readLine()) != null) {
-                final String[] route = line.split("/");
-                if (route.length == 2) {
-                    builder.addRoute(route[0], Integer.parseInt(route[1]));
-                }
-            }
-
-        } catch (final Throwable t) {
-            Log.e(TAG, "", t);
-
-        }
-        // ignore
-    }
-
     private String createDomains() {
         InputStream in;
         OutputStream out;
@@ -213,33 +189,31 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     private void startVpn() {
         String LOCAL_DNS = "114.114.114.114";
         int VPN_CIDR = 24;
-        boolean verbose = false;
 
         Log.i(TAG, "DNS Server: " + config.dns);
 
-        builder = new Builder();
+        Builder builder = new Builder();
         builder.setSession(config.profileName);
         builder.setMtu(config.mtu);
         builder.addAddress(config.localIP, VPN_CIDR);
         builder.addDnsServer(config.dns);
         builder.addRoute("114.114.115.115", 32);
 
-        try {
-            if (config.isProxyApps) {
-                Log.i(TAG, "Per-App Proxy");
-                ProxyApp[] apps = AppManagerActivity.getProxiedApps(this, config.proxiedAppString);
-                for (ProxyApp app : apps) {
+        if (config.isProxyApps) {
+            Log.i(TAG, "Per-App Proxy");
+            ProxyApp[] apps = AppManagerActivity.getProxiedApps(this, config.proxiedAppString);
+            for (ProxyApp app : apps) {
+                try {
                     if (config.isBypassApps) {
                         builder.addDisallowedApplication(app.getPackageName());
 
                     } else {
                         builder.addAllowedApplication(app.getPackageName());
                     }
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "Package not available: " + app.getPackageName(), e);
                 }
             }
-
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.e(TAG, ex.getMessage());
         }
 
         boolean global = !config.isProxyApps;
@@ -253,14 +227,15 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
         String ifconf = String.format(Locale.ENGLISH, "%s/%d", config.localIP, VPN_CIDR);
         int fd = vpnInterface.getFd();
-        Log.i(TAG, "Vpn fd: " + fd);
+        Log.d(TAG, "Vpn fd: " + fd);
         String domainPath = createDomains();
-        boolean rc = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, verbose,
-                                config.password, LOCAL_DNS, domainPath);
+        boolean rc = xTun.init(this, ifconf, fd, config.mtu, config.protocol, global, false,
+                               config.password, LOCAL_DNS, domainPath);
         if (rc) {
             handler.sendEmptyMessage(CONNECTED);
             xTun.start(config.server, config.remotePort);
         } else {
+            int FAILED = 0;
             handler.sendEmptyMessage(FAILED);
         }
     }
@@ -300,6 +275,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     private void stopRunner() {
         if (vpnThread != null) {
             xTun.stop();
+            Log.i(TAG, "vpn thread interrupt");
             vpnThread.interrupt();
             vpnThread = null;
         }
@@ -331,10 +307,6 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
     }
 
     private void changeState(Constants.State s) {
-        changeState(s, null);
-    }
-
-    private void changeState(Constants.State s, String msg) {
         Handler handler = new Handler(getBaseContext().getMainLooper());
         handler.post(() -> {
             if (state != s) {
@@ -342,7 +314,7 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
                     int n = callbacks.beginBroadcast();
                     for (int i = 0; i <= n - 1; i++) {
                         try {
-                            callbacks.getBroadcastItem(i).stateChanged(s.ordinal(), msg);
+                            callbacks.getBroadcastItem(i).stateChanged(s.ordinal(), null);
                         } catch (RemoteException e) {
                             // Ignore
                         }
@@ -361,16 +333,10 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
 
     @Override
     public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case CONNECTED:
-                notifyForegroundAlert(getString(R.string.forward_success), getString(R.string.service_running, config.profileName));
-                changeState(Constants.State.CONNECTED);
-                break;
-            case STOPPED:
-                // clean up
-                break;
+        if (msg.what == CONNECTED) {
+            notifyForegroundAlert(getString(R.string.forward_success), getString(R.string.service_running, config.profileName));
+            changeState(Constants.State.CONNECTED);
         }
-
         return true;
     }
 
