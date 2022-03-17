@@ -11,7 +11,7 @@ android {
     buildToolsVersion '32.0.0'
     defaultConfig {
         applicationId "io.github.xTun"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 29
         versionCode 130
         versionName '1.3.0'
