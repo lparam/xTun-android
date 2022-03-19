@@ -1,6 +1,8 @@
 package io.github.xTun.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -104,21 +106,27 @@ public class xTunVpnService extends VpnService implements Handler.Callback, Runn
         String channelId = "service-vpn";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent fullScreenIntent = new Intent(this, MainActivity.class);
-            fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            NotificationChannel channel = new NotificationChannel(channelId, "xTun Foreground Service", NotificationManager.IMPORTANCE_LOW);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
+
+            Intent fullScreenIntent = new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
                     fullScreenIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Notification nf = new NotificationCompat.Builder(this, channelId)
+            Notification notification = new NotificationCompat.Builder(this, channelId)
                     .setContentText(info)
                     .setContentTitle(getString(R.string.app_name))
                     .setSmallIcon(R.drawable.ic_logo)
-                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setPriority(NotificationManager.IMPORTANCE_DEFAULT)
+                    .setCategory(Notification.CATEGORY_SERVICE)
+                    .setChannelId(channelId)
                     .setContentIntent(fullScreenPendingIntent)
                     .build();
 
-            startForeground(1, nf);
+            startForeground(1, notification);
 
         } else {
             Intent openIntent = new Intent(this, MainActivity.class);
